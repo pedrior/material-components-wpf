@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Material.Components", "src\Material.Components\Material.Components.csproj", "{AEED2AD8-57FD-43A2-8695-3E914DC5BE69}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Material.Components.Gallery", "src\Material.Components.Gallery\Material.Components.Gallery.csproj", "{F36FDEE3-A095-483F-993D-3E5BC83FDDA7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AEED2AD8-57FD-43A2-8695-3E914DC5BE69}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AEED2AD8-57FD-43A2-8695-3E914DC5BE69}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AEED2AD8-57FD-43A2-8695-3E914DC5BE69}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AEED2AD8-57FD-43A2-8695-3E914DC5BE69}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F36FDEE3-A095-483F-993D-3E5BC83FDDA7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F36FDEE3-A095-483F-993D-3E5BC83FDDA7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F36FDEE3-A095-483F-993D-3E5BC83FDDA7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F36FDEE3-A095-483F-993D-3E5BC83FDDA7}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

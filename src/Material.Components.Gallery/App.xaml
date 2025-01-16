@@ -1,0 +1,15 @@
+﻿<Application
+    x:Class="Material.Components.Gallery.App"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mat="https://https://github.com/pedrior/material-components-wpf"
+    StartupUri="Views/ShellView.xaml">
+
+    <Application.Resources>
+        <mat:ThemeDictionary ThemeMode="Light">
+            <mat:ThemeDictionary.Theme>
+                <mat:BaselineTheme />
+            </mat:ThemeDictionary.Theme>
+        </mat:ThemeDictionary>
+    </Application.Resources>
+</Application>

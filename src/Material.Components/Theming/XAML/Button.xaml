@@ -1,0 +1,219 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="clr-namespace:Material.Components.Controls"
+    xmlns:elevations="clr-namespace:Material.Components.Elevations"
+    xmlns:icons="clr-namespace:Material.Components.Icons"
+    xmlns:interaction="clr-namespace:Material.Components.Interaction"
+    xmlns:layout="clr-namespace:Material.Components.Layout"
+    xmlns:shapes="clr-namespace:Material.Components.Shapes">
+
+    <Style TargetType="{x:Type controls:Button}">
+        <Setter Property="Background" Value="{DynamicResource MaterialColorPrimary}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource MaterialColorPrimary}" />
+        <Setter Property="Foreground" Value="{DynamicResource MaterialColorOnPrimary}" />
+        <Setter Property="Kind" Value="Filled" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Height" Value="40" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="FontFamily" Value="{DynamicResource MaterialFontRoboto}" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="UseLayoutRounding" Value="True" />
+        <Setter Property="OverridesDefaultStyle" Value="True" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="icons:IconAssist.Size" Value="18" />
+        <Setter Property="icons:IconAssist.Position" Value="Leading" />
+        <Setter Property="shapes:ShapeAssist.Style" Value="Full" />
+        <Setter Property="layout:LayoutAssist.Spacing" Value="8" />
+        <Setter Property="elevations:ElevationAssist.Level" Value="None" />
+        <Setter Property="interaction:InteractionAssist.FocusIndicatorBrush" Value="{DynamicResource MaterialColorPrimary}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type controls:Button}">
+                    <controls:FocusIndicator DefiningGeometry="{Binding ElementName=Container, Path=SurfaceGeometry}">
+                        <controls:StateLayer
+                            DefiningGeometry="{Binding ElementName=Container, Path=SurfaceGeometry}"
+                            IsHovered="{TemplateBinding IsMouseOver}"
+                            IsPressed="{TemplateBinding IsPressed}"
+                            Tint="{TemplateBinding Foreground}">
+
+                            <controls:Container
+                                x:Name="Container"
+                                elevations:ElevationAssist.Level="{TemplateBinding elevations:ElevationAssist.Level}"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+
+                                <controls:Ripple Clip="{Binding ElementName=Container, Path=SurfaceGeometry}" Tint="{TemplateBinding Foreground}">
+                                    <controls:SpacedPanel
+                                        x:Name="Panel"
+                                        Margin="24,0"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Spacing="{TemplateBinding layout:LayoutAssist.Spacing}">
+
+                                        <controls:SymbolIcon
+                                            x:Name="Icon"
+                                            Width="{TemplateBinding icons:IconAssist.Size}"
+                                            Height="{TemplateBinding icons:IconAssist.Size}"
+                                            VerticalAlignment="Center"
+                                            AutoCollapse="True"
+                                            Foreground="{TemplateBinding Foreground}"
+                                            RenderInvalidSymbol="False" />
+
+                                        <ContentPresenter
+                                            VerticalAlignment="Center"
+                                            Content="{TemplateBinding Content}"
+                                            ContentStringFormat="{TemplateBinding ContentStringFormat}"
+                                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                                            ContentTemplateSelector="{TemplateBinding ContentTemplateSelector}"
+                                            RecognizesAccessKey="True"
+                                            TextElement.Foreground="{TemplateBinding Foreground}" />
+                                    </controls:SpacedPanel>
+                                </controls:Ripple>
+                            </controls:Container>
+                        </controls:StateLayer>
+                    </controls:FocusIndicator>
+
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="Container" Property="ChildOpacity" Value="0.38" />
+                            <Setter TargetName="Container" Property="SurfaceOpacity" Value="0.12" />
+                        </Trigger>
+
+                        <DataTrigger Binding="{Binding ElementName=Icon, Path=IsRendered}" Value="True">
+                            <Setter TargetName="Panel" Property="Margin" Value="16,0,24,0" />
+                        </DataTrigger>
+
+                        <Trigger Property="icons:IconAssist.Position" Value="Trailing">
+                            <Setter TargetName="Panel" Property="ReverseOrder" Value="True" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+
+        <Style.Triggers>
+            <MultiTrigger>
+                <MultiTrigger.Conditions>
+                    <Condition Property="Kind" Value="Tonal" />
+                    <Condition Property="IsEnabled" Value="True" />
+                </MultiTrigger.Conditions>
+                <Setter Property="Background" Value="{DynamicResource MaterialColorSecondaryContainer}" />
+                <Setter Property="BorderBrush" Value="{DynamicResource MaterialColorSecondaryContainer}" />
+                <Setter Property="Foreground" Value="{DynamicResource MaterialColorOnSecondaryContainer}" />
+            </MultiTrigger>
+
+            <MultiTrigger>
+                <MultiTrigger.Conditions>
+                    <Condition Property="Kind" Value="Elevated" />
+                    <Condition Property="IsEnabled" Value="True" />
+                </MultiTrigger.Conditions>
+                <Setter Property="Background" Value="{DynamicResource MaterialColorSurfaceContainerLow}" />
+                <Setter Property="BorderBrush" Value="{DynamicResource MaterialColorSurfaceContainerLow}" />
+                <Setter Property="Foreground" Value="{DynamicResource MaterialColorPrimary}" />
+            </MultiTrigger>
+
+            <MultiTrigger>
+                <MultiTrigger.Conditions>
+                    <Condition Property="Kind" Value="Outlined" />
+                    <Condition Property="IsEnabled" Value="True" />
+                </MultiTrigger.Conditions>
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="BorderBrush" Value="{DynamicResource MaterialColorOutline}" />
+                <Setter Property="Foreground" Value="{DynamicResource MaterialColorPrimary}" />
+                <Setter Property="BorderThickness" Value="1" />
+            </MultiTrigger>
+
+            <MultiTrigger>
+                <MultiTrigger.Conditions>
+                    <Condition Property="Kind" Value="Text" />
+                    <Condition Property="IsEnabled" Value="True" />
+                </MultiTrigger.Conditions>
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="BorderBrush" Value="Transparent" />
+                <Setter Property="Foreground" Value="{DynamicResource MaterialColorPrimary}" />
+            </MultiTrigger>
+
+            <MultiTrigger>
+                <MultiTrigger.Conditions>
+                    <Condition Property="Kind" Value="Filled" />
+                    <Condition Property="IsEnabled" Value="False" />
+                </MultiTrigger.Conditions>
+                <Setter Property="Background" Value="{DynamicResource MaterialColorOnSurface}" />
+                <Setter Property="BorderBrush" Value="{DynamicResource MaterialColorOnSurface}" />
+                <Setter Property="Foreground" Value="{DynamicResource MaterialColorOnSurface}" />
+            </MultiTrigger>
+
+            <MultiTrigger>
+                <MultiTrigger.Conditions>
+                    <Condition Property="Kind" Value="Tonal" />
+                    <Condition Property="IsEnabled" Value="False" />
+                </MultiTrigger.Conditions>
+                <Setter Property="Background" Value="{DynamicResource MaterialColorOnSurface}" />
+                <Setter Property="BorderBrush" Value="{DynamicResource MaterialColorOnSurface}" />
+                <Setter Property="Foreground" Value="{DynamicResource MaterialColorOnSurface}" />
+            </MultiTrigger>
+
+            <MultiTrigger>
+                <MultiTrigger.Conditions>
+                    <Condition Property="Kind" Value="Elevated" />
+                    <Condition Property="IsEnabled" Value="False" />
+                </MultiTrigger.Conditions>
+                <Setter Property="Background" Value="{DynamicResource MaterialColorOnSurface}" />
+                <Setter Property="BorderBrush" Value="{DynamicResource MaterialColorOnSurface}" />
+                <Setter Property="Foreground" Value="{DynamicResource MaterialColorOnSurface}" />
+            </MultiTrigger>
+
+            <MultiTrigger>
+                <MultiTrigger.Conditions>
+                    <Condition Property="Kind" Value="Outlined" />
+                    <Condition Property="IsEnabled" Value="False" />
+                </MultiTrigger.Conditions>
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="BorderBrush" Value="{DynamicResource MaterialColorOnSurface}" />
+                <Setter Property="Foreground" Value="{DynamicResource MaterialColorOnSurface}" />
+                <Setter Property="BorderThickness" Value="1" />
+            </MultiTrigger>
+
+            <MultiTrigger>
+                <MultiTrigger.Conditions>
+                    <Condition Property="Kind" Value="Text" />
+                    <Condition Property="IsEnabled" Value="False" />
+                </MultiTrigger.Conditions>
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="BorderBrush" Value="Transparent" />
+                <Setter Property="Foreground" Value="{DynamicResource MaterialColorOnSurface}" />
+            </MultiTrigger>
+
+            <MultiTrigger>
+                <MultiTrigger.Conditions>
+                    <Condition Property="Kind" Value="Tonal" />
+                    <Condition Property="IsMouseOver" Value="True" />
+                </MultiTrigger.Conditions>
+                <Setter Property="elevations:ElevationAssist.Level" Value="Level1" />
+            </MultiTrigger>
+
+            <MultiTrigger>
+                <MultiTrigger.Conditions>
+                    <Condition Property="Kind" Value="Elevated" />
+                    <Condition Property="IsMouseOver" Value="False" />
+                </MultiTrigger.Conditions>
+                <Setter Property="elevations:ElevationAssist.Level" Value="Level1" />
+            </MultiTrigger>
+
+            <MultiTrigger>
+                <MultiTrigger.Conditions>
+                    <Condition Property="Kind" Value="Elevated" />
+                    <Condition Property="IsMouseOver" Value="True" />
+                </MultiTrigger.Conditions>
+                <Setter Property="elevations:ElevationAssist.Level" Value="Level2" />
+            </MultiTrigger>
+        </Style.Triggers>
+    </Style>
+</ResourceDictionary>
