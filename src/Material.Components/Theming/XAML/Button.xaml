@@ -32,6 +32,7 @@
         <Setter Property="layout:LayoutAssist.Spacing" Value="8" />
         <Setter Property="elevations:ElevationAssist.Level" Value="None" />
         <Setter Property="interaction:InteractionAssist.FocusIndicatorBrush" Value="{DynamicResource MaterialColorPrimary}" />
+        <Setter Property="interaction:InteractionAssist.RippleTint" Value="{Binding RelativeSource={RelativeSource Self}, Path=Foreground}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type controls:Button}">
@@ -42,7 +43,7 @@
                             IsPressed="{TemplateBinding IsPressed}"
                             Tint="{TemplateBinding Foreground}">
 
-                            <controls:Ripple DefiningGeometry="{Binding ElementName=Container, Path=SurfaceGeometry}" Tint="{TemplateBinding Foreground}">
+                            <controls:Ripple DefiningGeometry="{Binding ElementName=Container, Path=SurfaceGeometry}">
                                 <controls:Container
                                     x:Name="Container"
                                     elevations:ElevationAssist.Level="{TemplateBinding elevations:ElevationAssist.Level}"
