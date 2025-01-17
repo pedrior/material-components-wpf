@@ -64,7 +64,7 @@ public class Ripple : DrawableContainer
         nameof(DefiningGeometry),
         typeof(Geometry),
         typeof(Ripple),
-        new PropertyMetadata(Geometry.Empty, OnDefiningGeometryChanged));
+        new PropertyMetadata(null, OnDefiningGeometryChanged));
 
     /// <summary>
     /// Identifies the <see cref="EnableRightClick"/> dependency property.
@@ -224,12 +224,13 @@ public class Ripple : DrawableContainer
     /// </remarks>
     /// <value>
     /// A <see cref="Geometry"/> that defines the shape of the ripple effect.
+    /// The default value is <see langword="null"/>.
     /// </value>
     [Bindable(true)]
     [Category("Appearance")]
-    public Geometry DefiningGeometry
+    public Geometry? DefiningGeometry
     {
-        get => (Geometry)GetValue(DefiningGeometryProperty);
+        get => (Geometry?)GetValue(DefiningGeometryProperty);
         set => SetValue(DefiningGeometryProperty, value);
     }
 

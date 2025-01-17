@@ -79,7 +79,7 @@ public class Container : DrawableContainer
         nameof(SurfaceGeometry),
         typeof(Geometry),
         typeof(Container),
-        new PropertyMetadata(Geometry.Empty));
+        new PropertyMetadata(null));
 
     /// <summary>
     /// Identifies the <see cref="SurfaceGeometry"/> dependency property.
@@ -289,14 +289,14 @@ public class Container : DrawableContainer
     /// </remarks>
     /// <value>
     /// A <see cref="Geometry"/> object representing the shape of the container's surface. 
-    /// The default value is <see cref="Geometry.Empty"/>, indicating no defined geometry.
+    /// The default value is <see langword="null"/>, indicating no defined geometry.
     /// </value>
     [Bindable(true)]
     [Category("Appearance")]
     [EditorBrowsable(EditorBrowsableState.Advanced)]
-    public Geometry SurfaceGeometry
+    public Geometry? SurfaceGeometry
     {
-        get => (Geometry)GetValue(SurfaceGeometryProperty);
+        get => (Geometry?)GetValue(SurfaceGeometryProperty);
         private set => SetValue(SurfaceGeometryPropertyKey, value);
     }
 

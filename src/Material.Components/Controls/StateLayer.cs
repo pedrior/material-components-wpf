@@ -33,7 +33,7 @@ public class StateLayer : DrawableContainer
         nameof(DefiningGeometry),
         typeof(Geometry),
         typeof(StateLayer),
-        new FrameworkPropertyMetadata(Geometry.Empty, FrameworkPropertyMetadataOptions.AffectsRender));
+        new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender));
 
     /// <summary>
     /// Identifies the <see cref="IsHovered"/> dependency property.
@@ -119,17 +119,17 @@ public class StateLayer : DrawableContainer
     /// </summary>
     /// <remarks>
     /// Use this property to customize the shape of the state layer. By default, this property is set to 
-    /// <see cref="Geometry.Empty"/>, meaning no specific geometry is applied.
+    /// <see langword="null"/>, meaning no specific geometry is applied.
     /// </remarks>
     /// <value>
     /// A <see cref="Geometry"/> that defines the visible area of the state layer.  
-    /// The default value is <see cref="Geometry.Empty"/>.
+    /// The default value is <see langword="null"/>.
     /// </value>
     [Bindable(true)]
     [Category("Appearance")]
-    public Geometry DefiningGeometry
+    public Geometry? DefiningGeometry
     {
-        get => (Geometry)GetValue(DefiningGeometryProperty);
+        get => (Geometry?)GetValue(DefiningGeometryProperty);
         set => SetValue(DefiningGeometryProperty, value);
     }
 

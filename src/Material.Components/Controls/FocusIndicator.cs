@@ -35,7 +35,7 @@ public class FocusIndicator : DrawableContainer
         typeof(Geometry),
         typeof(FocusIndicator),
         new FrameworkPropertyMetadata(
-            Geometry.Empty,
+            null,
             FrameworkPropertyMetadataOptions.AffectsRender,
             OnDefiningGeometryChanged));
 
@@ -124,11 +124,11 @@ public class FocusIndicator : DrawableContainer
     /// <remarks>
     /// By default, the focus indicator uses a rectangular shape.  
     /// You can customize this shape by providing a different <see cref="Geometry"/>.  
-    /// If not set, the focus indicator uses <see cref="Geometry.Empty"/>.
+    /// If not set, the focus indicator uses <see langword="null"/>.
     /// </remarks>
     /// <value>
     /// A <see cref="Geometry"/> object that defines the shape of the focus indicator.  
-    /// The default value is <see cref="Geometry.Empty"/>.
+    /// The default value is <see langword="null"/>.
     /// </value>
     [Bindable(true)]
     [Category("Appearance")]
