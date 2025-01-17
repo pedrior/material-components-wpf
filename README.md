@@ -56,29 +56,105 @@ The library's documentation is currently available in-code.
 
 ## 🎨 Styles
 
-### 🎭 Shape
+Styles define the visual aspects of your UI, giving it a distinct look and feel while maintaining consistency across 
+your application. They are essential for creating a cohesive and professional design that aligns with M3 principles.
 
 ### 🎨 Color
 
-### 🌀 Motion
+The color system in Material Components for WPF allows you to define primary, secondary, surface, background, error 
+colors, and more. It Supports light and dark themes, high-contrast accessibility options, and customizable palettes.
 
 ### 🎚️ Elevation
 
+Elevation adds depth to your UI by applying shadow effects, creating a clear visual hierarchy.
+
+Example:
+
+![Material Components for WPF - Ripple](./images/elevation.png)
+
+### ♦️ Icons
+
+Seamless integration with Google Material Symbols provides access to thousands of icons in three variants: **rounded**,
+**outlined**, and **sharp**.
+
+### 🌀 Motion
+
+> ⚠️ Note: Motion is currently under development. By now, the library only implements M3 motion curves and
+> defines duration constants.
+
+### 🎭 Shape
+
+Shapes defines the geometry of components, providing a consistent visual language across your application. The library
+supports **rounded** and **cut** shape families, as well as custom shapes.
+
+Example:
+
+- **Rounded**: for curved corners, such as circles or ovals.
+
+![Material Components for WPF - Rounded shape family](./images/shape-rounded.png)
+
+- **Cut**: for angular corners, such as squares with chamfered edges.
+
+![Material Components for WPF - Cut shape family](./images/shape-cut.png)
+
+- **Custom**: for custom shapes, such as custom radii or directional corners.
+
+![Material Components for WPF - Custom shape family](./images/shape-custom.png)
+
 ### 📏 Typography
+
+> ⚠️ Note: Typography is currently under development.
 
 ## 🧩 Components
 
-### 🔗 Building Blocks
+The library provides a rich set of UI elements, building blocks, and utilities that enable
+developers to create stunning applications adhering to M3 guidelines.
 
-#### **Container**:
+### 🔗 Building blocks
 
-#### **Ripple**:
+Building blocks are fundamental elements that serve as the foundation for more complex components.
+
+#### **Container**
+
+The **Container** is a stylized element that acts as a versatile building block. It supports:
+
+- Shape customization.
+- Elevation levels to define depth.
+- Color customizations and layering.
+
+Example:
+
+![Material Components for WPF - Container](./images/container.png)
+
+#### **Ripple**
+
+The **Ripple** provides visual feedback for user interactions by displaying a circular wave animation that 
+expands outward from the interaction point.
+
+Example:
+
+![Material Components for WPF - Ripple](./images/ripple.gif)
 
 #### **State Layer**:
 
+The **State Layer** visually communicates the current state of a component, such as hovered, pressed, or dragged.
+It enhances interactivity and accessibility by overlaying a semi-transparent color to indicate hover or pressed states.
+
 #### **Focus Indicator**:
 
+The **Focus Indicator** is a key accessibility element that highlights components currently in focus (via keyboard 
+navigation or other interactions). It includes:
+
+- A visual outline around the focused element to guide users.
+- Full support for custom shapes, color, thickness, and padding.
+
+Example:
+
+![Material Components for WPF - Ripple](./images/focus-indicator.gif)
+
 ### 🌟 Built-in Components
+
+> ⚠️ Note: Components are currently under development.
 
 ## 🤝 Contributing
 
