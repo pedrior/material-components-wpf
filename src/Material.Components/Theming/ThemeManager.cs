@@ -248,13 +248,8 @@ public sealed class ThemeManager
         }
     }
 
-    private void MergeResourceDictionary(ResourceDictionary dictionary)
-    {
-        foreach (var key in dictionary.Keys)
-        {
-            InsertOrUpdateResource(key, dictionary[key]);
-        }
-    }
+    private void MergeResourceDictionary(ResourceDictionary dictionary) => 
+        themeDictionary!.MergedDictionaries.Add(dictionary);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void InsertOrUpdateResource(object key, object? value) => themeDictionary![key] = value;
