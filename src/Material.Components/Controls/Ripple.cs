@@ -59,6 +59,8 @@ public class Ripple : DrawableContainer
 
     private const double DefaultOpacity = 0.1;
 
+    private readonly Geometry geometry = new EllipseGeometry(new Point(0, 0), 1, 1);
+    
     private readonly ScaleTransform scaleTransform = new();
     private readonly TranslateTransform translateTransform = new();
 
@@ -104,8 +106,7 @@ public class Ripple : DrawableContainer
 
         exitOpacityAnimation.Freeze();
 
-        VisualLayer.IsHitTestVisible = false;
-        VisualLayer.Transform = new TransformGroup
+        geometry.Transform = new TransformGroup
         {
             Children =
             {
@@ -113,6 +114,8 @@ public class Ripple : DrawableContainer
                 translateTransform
             }
         };
+        
+        VisualLayer.IsHitTestVisible = false;
     }
 
     /// <summary>
@@ -281,7 +284,7 @@ public class Ripple : DrawableContainer
     {
         base.OnVisualLayerRender(context);
 
-        context.DrawEllipse(Tint, pen: null, new Point(0, 0), 1, 1);
+        context.DrawGeometry(Tint, null, geometry);
     }
 
     private static object CoerceTint(DependencyObject element, object value)
