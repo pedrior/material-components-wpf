@@ -49,6 +49,24 @@ public class Ripple : DrawableContainer
         new PropertyMetadata(false));
 
     /// <summary>
+    /// Identifies the <see cref="IsUnbounded"/> dependency property.
+    /// </summary>
+    public static readonly DependencyProperty IsUnboundedProperty = DependencyProperty.Register(
+        nameof(IsUnbounded),
+        typeof(bool),
+        typeof(Ripple),
+        new PropertyMetadata(false, OnIsUnboundedChanged));
+
+    /// <summary>
+    /// Identifies the <see cref="DefiningGeometry"/> dependency property.
+    /// </summary>
+    public static readonly DependencyProperty DefiningGeometryProperty = DependencyProperty.Register(
+        nameof(DefiningGeometry),
+        typeof(Geometry),
+        typeof(Ripple),
+        new PropertyMetadata(Geometry.Empty, OnDefiningGeometryChanged));
+
+    /// <summary>
     /// Identifies the <see cref="EnableRightClick"/> dependency property.
     /// </summary>
     public static readonly DependencyProperty EnableRightClickProperty = DependencyProperty.Register(
@@ -60,7 +78,7 @@ public class Ripple : DrawableContainer
     private const double DefaultOpacity = 0.1;
 
     private readonly Geometry geometry = new EllipseGeometry(new Point(0, 0), 1, 1);
-    
+
     private readonly ScaleTransform scaleTransform = new();
     private readonly TranslateTransform translateTransform = new();
 
@@ -114,7 +132,7 @@ public class Ripple : DrawableContainer
                 translateTransform
             }
         };
-        
+
         VisualLayer.IsHitTestVisible = false;
     }
 
@@ -175,6 +193,44 @@ public class Ripple : DrawableContainer
     {
         get => (bool)GetValue(IsCenteredProperty);
         set => SetValue(IsCenteredProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the ripple effect should be unbounded or clipped to the defined
+    /// geometry.
+    /// <remarks>
+    /// When <see langword="true"/>, the ripple effect will expand beyond the bounds of the control. When
+    /// <see langword="false"/>, the ripple effect will be clipped to the bounds of the <see cref="DefiningGeometry"/>.
+    /// </remarks>
+    /// <value>
+    /// <see langword="true"/> if the ripple effect is unbounded; otherwise, <see langword="false"/>.
+    /// The default value is <see langword="false"/>.
+    /// </value>
+    /// </summary>
+    [Bindable(true)]
+    [Category("Common")]
+    public bool IsUnbounded
+    {
+        get => (bool)GetValue(IsUnboundedProperty);
+        set => SetValue(IsUnboundedProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the geometry that defines the shape of the ripple effect.
+    /// </summary>
+    /// <remarks>
+    /// This property defines the shape of the ripple effect. If <see cref="IsUnbounded"/> is set to
+    /// <see langword="false"/>, the ripple effect will be clipped to the bounds of this geometry.
+    /// </remarks>
+    /// <value>
+    /// A <see cref="Geometry"/> that defines the shape of the ripple effect.
+    /// </value>
+    [Bindable(true)]
+    [Category("Appearance")]
+    public Geometry DefiningGeometry
+    {
+        get => (Geometry)GetValue(DefiningGeometryProperty);
+        set => SetValue(DefiningGeometryProperty, value);
     }
 
     /// <summary>
@@ -287,6 +343,12 @@ public class Ripple : DrawableContainer
         context.DrawGeometry(Tint, null, geometry);
     }
 
+    private static void OnIsUnboundedChanged(DependencyObject element, DependencyPropertyChangedEventArgs e)=> 
+        ((Ripple)element).UpdateEffectClipping();
+
+    private static void OnDefiningGeometryChanged(DependencyObject element, DependencyPropertyChangedEventArgs e) => 
+        ((Ripple)element).UpdateEffectClipping();
+
     private static object CoerceTint(DependencyObject element, object value)
     {
         // We're going to animate the tint's opacity, so we need to unfreeze it.
@@ -301,6 +363,9 @@ public class Ripple : DrawableContainer
 
         return brush;
     }
+
+    private void UpdateEffectClipping() => 
+        VisualLayer.Clip = IsUnbounded ? null : DefiningGeometry;
 
     private void SubscribeToEvents(UIElement element)
     {
@@ -330,6 +395,8 @@ public class Ripple : DrawableContainer
         {
             SubscribeToEvents(Child);
         }
+
+        UpdateEffectClipping();
     }
 
     private void OnUnloaded(object sender, RoutedEventArgs e)
