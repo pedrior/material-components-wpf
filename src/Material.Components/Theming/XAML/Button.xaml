@@ -42,14 +42,14 @@
                             IsPressed="{TemplateBinding IsPressed}"
                             Tint="{TemplateBinding Foreground}">
 
-                            <controls:Container
-                                x:Name="Container"
-                                elevations:ElevationAssist.Level="{TemplateBinding elevations:ElevationAssist.Level}"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <controls:Ripple DefiningGeometry="{Binding ElementName=Container, Path=SurfaceGeometry}" Tint="{TemplateBinding Foreground}">
+                                <controls:Container
+                                    x:Name="Container"
+                                    elevations:ElevationAssist.Level="{TemplateBinding elevations:ElevationAssist.Level}"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}">
 
-                                <controls:Ripple Clip="{Binding ElementName=Container, Path=SurfaceGeometry}" Tint="{TemplateBinding Foreground}">
                                     <controls:SpacedPanel
                                         x:Name="Panel"
                                         Margin="24,0"
@@ -75,8 +75,8 @@
                                             RecognizesAccessKey="True"
                                             TextElement.Foreground="{TemplateBinding Foreground}" />
                                     </controls:SpacedPanel>
-                                </controls:Ripple>
-                            </controls:Container>
+                                </controls:Container>
+                            </controls:Ripple>
                         </controls:StateLayer>
                     </controls:FocusIndicator>
 
