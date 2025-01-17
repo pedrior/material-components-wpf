@@ -47,6 +47,18 @@ public interface IContainerVisual
     /// without altering its original structure.
     /// </remarks>
     Transform? Transform { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the geometry used to clip the visual element.
+    /// </summary>
+    /// <value>
+    /// A <see cref="Geometry"/> object that defines the clipping region for the visual element.
+    /// </value>
+    /// <remarks>
+    /// Clipping restricts the visible area of the visual element to the specified geometry,
+    /// effectively masking out any content outside the clipping region.
+    /// </remarks>
+    Geometry? Clip { get; set; }
 
     /// <summary>
     /// Gets or sets a value indicating whether the visual element can respond to hit testing.
