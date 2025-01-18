@@ -35,7 +35,16 @@ public class SpacedPanel : Panel
         typeof(Orientation),
         typeof(SpacedPanel),
         new FrameworkPropertyMetadata(Orientation.Horizontal, FrameworkPropertyMetadataOptions.AffectsMeasure));
-
+    
+    /// <summary>
+    /// Identifies the <see cref="Alignment"/> dependency property.
+    /// </summary>
+    public static readonly DependencyProperty AlignmentProperty = DependencyProperty.Register(
+        nameof(Alignment),
+        typeof(Alignment),
+        typeof(SpacedPanel),
+        new FrameworkPropertyMetadata(Alignment.Start, FrameworkPropertyMetadataOptions.AffectsArrange));
+    
     /// <summary>
     /// Identifies the <see cref="ReverseOrder"/> dependency property.
     /// </summary>
@@ -121,6 +130,25 @@ public class SpacedPanel : Panel
     {
         get => (Orientation)GetValue(OrientationProperty);
         set => SetValue(OrientationProperty, value);
+    }
+    
+    /// <summary>
+    /// Gets or sets the alignment of child elements within the panel.
+    /// </summary>
+    /// <value>
+    /// An <see cref="Alignment"/> value that specifies how child elements are aligned 
+    /// within the available space of the panel. The default value is <see cref="Alignment.Start"/>.
+    /// </value>
+    /// <remarks>
+    /// The <see cref="Alignment"/> property determines the position of child elements relative 
+    /// to the panel's layout direction.
+    /// </remarks>
+    [Bindable(true)]
+    [Category("Layout")]
+    public Alignment Alignment
+    {
+        get => (Alignment)GetValue(AlignmentProperty);
+        set => SetValue(AlignmentProperty, value);
     }
 
     /// <summary>
@@ -330,6 +358,16 @@ public class SpacedPanel : Panel
         var x = 0.0; // Holds the x-coordinate for the next child in the horizontal line.
         var y = 0.0; // Holds the y-coordinate for the next child in the vertical line.
 
+        // Adjust starting x or y based on Alignment and remaining space.
+        if (orientation is Orientation.Horizontal)
+        {
+            x = ComputeAlignmentOffset(measuredWidth, constraint.Width, Alignment);
+        }
+        else
+        {
+            y = ComputeAlignmentOffset(measuredHeight, constraint.Height, Alignment);
+        }
+        
         for (var index = 0; index < childrenCount; index++)
         {
             // Gets the child in the correct order.
@@ -358,7 +396,7 @@ public class SpacedPanel : Panel
                 else
                 {
                     // Aligns the child vertically based on the specified alignment (Top, Center, Bottom).
-                    yy = CalcChildVerticalOffset(size.Height, constraint.Height, verticalAlignment);
+                    yy = ComputeAlignmentOffset(size.Height, constraint.Height, verticalAlignment);
                 }
 
                 if (horizontalAlignment is HorizontalAlignment.Stretch)
@@ -393,7 +431,7 @@ public class SpacedPanel : Panel
                 else
                 {
                     // Aligns the child horizontally based on the specified alignment (Left, Center, Right).
-                    xx = CalcChildHorizontalOffset(size.Width, constraint.Width, horizontalAlignment);
+                    xx = ComputeAlignmentOffset(size.Width, constraint.Width, horizontalAlignment);
                 }
 
                 if (verticalAlignment is VerticalAlignment.Stretch)
@@ -437,30 +475,18 @@ public class SpacedPanel : Panel
                (size.Height is 0.0 && orientation is Orientation.Vertical);
     }
 
-    private static double CalcChildVerticalOffset(double height, double maxHeight, VerticalAlignment alignment)
+    private static double ComputeAlignmentOffset(double size, double maxSize, Enum alignment)
     {
-        var y = alignment switch
+        var offset = alignment switch
         {
-            VerticalAlignment.Center => (maxHeight - height) * 0.5,
-            VerticalAlignment.Bottom => maxHeight - height,
+            Alignment.Middle or VerticalAlignment.Center or HorizontalAlignment.Center => (maxSize - size) * 0.5,
+            Alignment.End or VerticalAlignment.Bottom or HorizontalAlignment.Right=> maxSize - size,
             _ => 0.0
         };
 
-        return Math.Max(0.0, y);
+        return Math.Max(0.0, offset);
     }
-
-    private static double CalcChildHorizontalOffset(double width, double maxWidth, HorizontalAlignment alignment)
-    {
-        var x = alignment switch
-        {
-            HorizontalAlignment.Center => (maxWidth - width) * 0.5,
-            HorizontalAlignment.Right => maxWidth - width,
-            _ => 0.0
-        };
-
-        return Math.Max(0.0, x);
-    }
-
+    
     private bool CanMergeAdjacentBorders(double spacing, double thickness) =>
         spacing is 0.0 && thickness > 0.0 && MergeAdjacentBorders;
 }
