@@ -8,3 +8,4 @@ riderModule.iml
 
 *.suo
 *.user
+*wpftmp.csproj
