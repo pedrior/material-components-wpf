@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Media;
 using Material.Components.Components;
 using Material.Components.Controls;
 
@@ -68,6 +69,15 @@ public static class IconAssist
         typeof(IconAssist),
         new FrameworkPropertyMetadata(IconPosition.Leading));
 
+    /// <summary>
+    /// Identifies the <c>Foreground</c> attached property.
+    /// </summary>
+    public static readonly DependencyProperty ForegroundProperty = DependencyProperty.RegisterAttached(
+        "Foreground",
+        typeof(Brush),
+        typeof(IconAssist),
+        new FrameworkPropertyMetadata(Brushes.Black));
+    
     /// <summary>
     /// Sets the value of the <see cref="SymbolProperty"/> attached property for the specified element.
     /// </summary>
@@ -185,4 +195,24 @@ public static class IconAssist
     /// <remarks>The default value is <see cref="IconPosition.Leading"/>.</remarks>
     public static IconPosition GetPosition(DependencyObject element) =>
         (IconPosition)element.GetValue(PositionProperty);
+    
+    /// <summary>
+    /// Sets the value of the <see cref="ForegroundProperty"/> attached property for the specified element.
+    /// </summary>
+    /// <param name="element">The <see cref="DependencyObject"/> for which to set the property value.</param>
+    /// <param name="value">A <see cref="Brush"/> value to define the icon's foreground color.</param>
+    /// <remarks>
+    /// Allows specifying the icon's foreground color.
+    /// <para>The default value is <see cref="Brushes.Black"/>.</para>
+    /// </remarks>
+    public static void SetForeground(DependencyObject element, Brush? value) => 
+        element.SetValue(ForegroundProperty, value);
+    
+    /// <summary>
+    /// Gets the value of the <see cref="ForegroundProperty"/> attached property for the specified element.
+    /// </summary>
+    /// <param name="element">The <see cref="DependencyObject"/> for which to retrieve the property value.</param>
+    /// <returns>The <see cref="Brush"/> assigned to the element.</returns>
+    /// <remarks>The default value is <see cref="Brushes.Black"/>.</remarks>
+    public static Brush? GetForeground(DependencyObject element) => (Brush?)element.GetValue(ForegroundProperty);
 }

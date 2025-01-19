@@ -15,5 +15,6 @@
         <Setter Property="Kind" Value="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=(icons:IconAssist.Kind)}" />
         <Setter Property="Symbol" Value="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=(icons:IconAssist.Symbol)}" />
         <Setter Property="Weight" Value="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=(icons:IconAssist.Weight)}" />
+        <Setter Property="Foreground" Value="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=(icons:IconAssist.Foreground)}" />
     </Style>
 </ResourceDictionary>

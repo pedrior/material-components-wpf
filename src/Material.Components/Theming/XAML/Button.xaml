@@ -27,6 +27,7 @@
         <Setter Property="HorizontalContentAlignment" Value="Center" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="icons:IconAssist.Size" Value="18" />
+        <Setter Property="icons:IconAssist.Foreground" Value="{Binding RelativeSource={RelativeSource Self}, Path=Foreground}" />
         <Setter Property="icons:IconAssist.Position" Value="Leading" />
         <Setter Property="shapes:ShapeAssist.Style" Value="Full" />
         <Setter Property="layout:LayoutAssist.Spacing" Value="8" />
@@ -64,7 +65,6 @@
                                             Height="{TemplateBinding icons:IconAssist.Size}"
                                             VerticalAlignment="Center"
                                             AutoCollapse="True"
-                                            Foreground="{TemplateBinding Foreground}"
                                             RenderInvalidSymbol="False" />
 
                                         <ContentPresenter
