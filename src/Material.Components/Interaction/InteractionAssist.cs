@@ -71,10 +71,7 @@ public static class InteractionAssist
         "FocusIndicatorPadding",
         typeof(double),
         typeof(InteractionAssist),
-        new FrameworkPropertyMetadata(
-            FocusIndicator.PaddingProperty.DefaultMetadata.DefaultValue,
-            propertyChangedCallback: null,
-            FocusIndicator.CoercePadding),
+        new FrameworkPropertyMetadata(FocusIndicator.PaddingProperty.DefaultMetadata.DefaultValue),
         FocusIndicator.ValidatePadding);
 
     /// <summary>

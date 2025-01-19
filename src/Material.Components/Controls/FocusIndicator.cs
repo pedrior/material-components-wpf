@@ -49,8 +49,7 @@ public class FocusIndicator : DrawableContainer
         new FrameworkPropertyMetadata(
             4.0,
             FrameworkPropertyMetadataOptions.AffectsRender,
-            OnPaddingChanged,
-            CoercePadding),
+            OnPaddingChanged),
         ValidatePadding);
 
     /// <summary>
@@ -264,9 +263,7 @@ public class FocusIndicator : DrawableContainer
             SubscribeToEvents(newElement);
         }
     }
-
-    internal static object CoercePadding(DependencyObject _, object value) => Math.Max(0.0, (double)value);
-
+    
     internal static object CoerceThickness(DependencyObject _, object value) => Math.Max(0.0, (double)value);
 
     internal static bool ValidatePadding(object value)
