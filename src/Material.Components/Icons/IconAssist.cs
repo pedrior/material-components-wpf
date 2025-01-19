@@ -1,6 +1,5 @@
 using System.Windows;
 using System.Windows.Media;
-using Material.Components.Components;
 using Material.Components.Controls;
 
 namespace Material.Components.Icons;

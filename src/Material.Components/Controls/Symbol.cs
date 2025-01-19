@@ -8,7 +8,7 @@
 //------------------------------------------------------------------------------
 
 // Generated at: 18/12/2024 00:53:49 +00:00
-namespace Material.Components.Components
+namespace Material.Components.Controls
 {
     /// <summary>
     /// Defines the symbols contained in Material Symbols font set.

@@ -1,7 +1,6 @@
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Media;
-using Material.Components.Components;
 
 namespace Material.Components.Controls;
 
