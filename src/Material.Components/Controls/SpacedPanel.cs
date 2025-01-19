@@ -271,7 +271,7 @@ public class SpacedPanel : Panel
             var size = child.DesiredSize;
 
             // Skips the child if it is collapsed or has no size.
-            if (ShouldSkipLayoutPass(child.Visibility, size, orientation))
+            if (ShouldSkipLayoutPass(child, orientation, size))
             {
                 totalSpacing = Math.Max(0.0, totalSpacing - spacing);
                 totalThicknessToRemove = Math.Max(0.0, totalThicknessToRemove - uniformChildrenThickness);
@@ -377,7 +377,7 @@ public class SpacedPanel : Panel
             var size = child.DesiredSize;
 
             // Skips the child if it is collapsed or has no size.
-            if (ShouldSkipLayoutPass(child.Visibility, size, orientation))
+            if (ShouldSkipLayoutPass(child, orientation, size))
             {
                 continue;
             }
@@ -468,11 +468,21 @@ public class SpacedPanel : Panel
     private static object CoerceThickness(DependencyObject _, object value) =>
         Math.Max(0.0, Math.Round((double)value));
 
-    private static bool ShouldSkipLayoutPass(Visibility visibility, Size size, Orientation orientation)
+    private static bool ShouldSkipLayoutPass(UIElement child, Orientation orientation, Size size)
     {
-        return visibility is Visibility.Collapsed ||
-               (size.Width is 0.0 && orientation is Orientation.Horizontal) ||
-               (size.Height is 0.0 && orientation is Orientation.Vertical);
+        if (child.Visibility is Visibility.Collapsed)
+        {
+            return true;
+        }
+        
+        switch (orientation)
+        {
+            case Orientation.Vertical when size.Height is 0.0 && !double.IsNaN((double)child.GetValue(HeightProperty)):
+            case Orientation.Horizontal when size.Width is 0.0 && !double.IsNaN((double)child.GetValue(WidthProperty)):
+                return true;
+            default:
+                return false;
+        }
     }
 
     private static double ComputeAlignmentOffset(double size, double maxSize, Enum alignment)
