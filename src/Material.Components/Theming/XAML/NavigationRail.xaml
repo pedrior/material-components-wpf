@@ -1,0 +1,75 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="clr-namespace:Material.Components.Controls"
+    xmlns:layout="clr-namespace:Material.Components.Layout">
+
+    <Style TargetType="{x:Type controls:NavigationRail}">
+        <Setter Property="Background" Value="{DynamicResource MaterialColorSurface}" />
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="IsTabStop" Value="False" />
+        <Setter Property="MinWidth" Value="80" />
+        <Setter Property="Alignment" Value="Top" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="UseLayoutRounding" Value="True" />
+        <Setter Property="OverridesDefaultStyle" Value="True" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+        <Setter Property="VerticalAlignment" Value="Stretch" />
+        <Setter Property="layout:LayoutAssist.Spacing" Value="12" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type controls:NavigationRail}">
+                    <controls:Container
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}">
+
+                        <ScrollViewer VerticalScrollBarVisibility="Hidden">
+                            <controls:SpacedPanel
+                                Margin="0,44,0,56"
+                                Orientation="Vertical"
+                                Spacing="40">
+
+                                <ContentPresenter
+                                    x:Name="TopActions"
+                                    VerticalAlignment="Top"
+                                    Content="{TemplateBinding TopActions}" />
+
+                                <controls:SpacedPanel
+                                    x:Name="Destinations"
+                                    VerticalAlignment="Stretch"
+                                    IsItemsHost="True"
+                                    Orientation="Vertical"
+                                    Spacing="{TemplateBinding layout:LayoutAssist.Spacing}" />
+
+                                <ContentPresenter
+                                    x:Name="BottomActions"
+                                    VerticalAlignment="Bottom"
+                                    Content="{TemplateBinding BottomActions}" />
+                            </controls:SpacedPanel>
+                        </ScrollViewer>
+                    </controls:Container>
+
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="Alignment" Value="Middle">
+                            <Setter TargetName="Destinations" Property="Alignment" Value="Middle" />
+                        </Trigger>
+
+                        <Trigger Property="Alignment" Value="Bottom">
+                            <Setter TargetName="Destinations" Property="Alignment" Value="End" />
+                        </Trigger>
+
+                        <Trigger Property="TopActions" Value="{x:Null}">
+                            <Setter TargetName="TopActions" Property="Visibility" Value="Collapsed" />
+                        </Trigger>
+
+                        <Trigger Property="BottomActions" Value="{x:Null}">
+                            <Setter TargetName="BottomActions" Property="Visibility" Value="Collapsed" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+</ResourceDictionary>
