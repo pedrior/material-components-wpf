@@ -31,7 +31,6 @@
         <Setter Property="icons:IconAssist.Position" Value="Leading" />
         <Setter Property="shapes:ShapeAssist.Style" Value="Full" />
         <Setter Property="layout:LayoutAssist.Spacing" Value="8" />
-        <Setter Property="elevations:ElevationAssist.Level" Value="None" />
         <Setter Property="interaction:InteractionAssist.FocusIndicatorBrush" Value="{DynamicResource MaterialColorPrimary}" />
         <Setter Property="interaction:InteractionAssist.RippleTint" Value="{Binding RelativeSource={RelativeSource Self}, Path=Foreground}" />
         <Setter Property="Template">
@@ -47,7 +46,6 @@
                             <controls:Ripple DefiningGeometry="{Binding ElementName=Container, Path=SurfaceGeometry}">
                                 <controls:Container
                                     x:Name="Container"
-                                    elevations:ElevationAssist.Level="{TemplateBinding elevations:ElevationAssist.Level}"
                                     Background="{TemplateBinding Background}"
                                     BorderBrush="{TemplateBinding BorderBrush}"
                                     BorderThickness="{TemplateBinding BorderThickness}">

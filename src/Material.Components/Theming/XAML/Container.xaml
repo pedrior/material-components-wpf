@@ -2,6 +2,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:controls="clr-namespace:Material.Components.Controls"
+    xmlns:elevations="clr-namespace:Material.Components.Elevations"
     xmlns:shapes="clr-namespace:Material.Components.Shapes">
 
     <Style TargetType="{x:Type controls:Container}">
@@ -13,5 +14,6 @@
         <Setter Property="shapes:ShapeAssist.Style" Value="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=(shapes:ShapeAssist.Style)}" />
         <Setter Property="shapes:ShapeAssist.Direction" Value="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=(shapes:ShapeAssist.Direction)}" />
         <Setter Property="shapes:ShapeAssist.Radius" Value="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=(shapes:ShapeAssist.Radius)}" />
+        <Setter Property="elevations:ElevationAssist.Level" Value="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=(elevations:ElevationAssist.Level)}" />
     </Style>
 </ResourceDictionary>
