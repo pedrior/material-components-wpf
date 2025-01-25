@@ -26,38 +26,44 @@
                         BorderThickness="{TemplateBinding BorderThickness}">
 
                         <ScrollViewer VerticalScrollBarVisibility="Hidden">
-                            <controls:SpacedPanel
-                                Margin="0,44,0,56"
-                                Orientation="Vertical"
-                                Spacing="40">
+                            <Grid Margin="0,44,0,56">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
 
                                 <ContentPresenter
                                     x:Name="TopActions"
+                                    Grid.Column="0"
                                     VerticalAlignment="Top"
                                     Content="{TemplateBinding TopActions}" />
 
                                 <controls:SpacedPanel
                                     x:Name="Destinations"
-                                    VerticalAlignment="Stretch"
+                                    Grid.Column="1"
+                                    Margin="0,40"
+                                    VerticalAlignment="Top"
                                     IsItemsHost="True"
                                     Orientation="Vertical"
                                     Spacing="{TemplateBinding layout:LayoutAssist.Spacing}" />
 
                                 <ContentPresenter
                                     x:Name="BottomActions"
+                                    Grid.Column="2"
                                     VerticalAlignment="Bottom"
                                     Content="{TemplateBinding BottomActions}" />
-                            </controls:SpacedPanel>
+                            </Grid>
                         </ScrollViewer>
                     </controls:Container>
 
                     <ControlTemplate.Triggers>
                         <Trigger Property="Alignment" Value="Middle">
-                            <Setter TargetName="Destinations" Property="Alignment" Value="Middle" />
+                            <Setter TargetName="Destinations" Property="VerticalAlignment" Value="Center" />
                         </Trigger>
 
                         <Trigger Property="Alignment" Value="Bottom">
-                            <Setter TargetName="Destinations" Property="Alignment" Value="End" />
+                            <Setter TargetName="Destinations" Property="VerticalAlignment" Value="Bottom" />
                         </Trigger>
 
                         <Trigger Property="TopActions" Value="{x:Null}">

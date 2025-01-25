@@ -35,16 +35,7 @@ public class SpacedPanel : Panel
         typeof(Orientation),
         typeof(SpacedPanel),
         new FrameworkPropertyMetadata(Orientation.Horizontal, FrameworkPropertyMetadataOptions.AffectsMeasure));
-    
-    /// <summary>
-    /// Identifies the <see cref="Alignment"/> dependency property.
-    /// </summary>
-    public static readonly DependencyProperty AlignmentProperty = DependencyProperty.Register(
-        nameof(Alignment),
-        typeof(Alignment),
-        typeof(SpacedPanel),
-        new FrameworkPropertyMetadata(Alignment.Start, FrameworkPropertyMetadataOptions.AffectsArrange));
-    
+
     /// <summary>
     /// Identifies the <see cref="ReverseOrder"/> dependency property.
     /// </summary>
@@ -78,12 +69,9 @@ public class SpacedPanel : Panel
 
     private static readonly Size InfiniteConstraint = new(double.PositiveInfinity, double.PositiveInfinity);
 
-    private double measuredWidth;
-    private double measuredHeight;
-
-    // Total children that specify stretch alignment.
-    // This value is computed during the measure pass.
-    private int stretchableChildrenCount;
+    private int stretchableChildrenCount; // Total children that specify stretch alignment.
+    private double maxStretchableChildWidth; // The maximum width that a stretchable child can have.
+    private double maxStretchableChildHeight; // The maximum height that a stretchable child can have.
 
     /// <summary>
     /// Initializes static members of the <see cref="SpacedPanel"/> class.
@@ -130,25 +118,6 @@ public class SpacedPanel : Panel
     {
         get => (Orientation)GetValue(OrientationProperty);
         set => SetValue(OrientationProperty, value);
-    }
-    
-    /// <summary>
-    /// Gets or sets the alignment of child elements within the panel.
-    /// </summary>
-    /// <value>
-    /// An <see cref="Alignment"/> value that specifies how child elements are aligned 
-    /// within the available space of the panel. The default value is <see cref="Alignment.Start"/>.
-    /// </value>
-    /// <remarks>
-    /// The <see cref="Alignment"/> property determines the position of child elements relative 
-    /// to the panel's layout direction.
-    /// </remarks>
-    [Bindable(true)]
-    [Category("Layout")]
-    public Alignment Alignment
-    {
-        get => (Alignment)GetValue(AlignmentProperty);
-        set => SetValue(AlignmentProperty, value);
     }
 
     /// <summary>
@@ -259,7 +228,12 @@ public class SpacedPanel : Panel
         var width = 0.0;
         var height = 0.0;
 
+        var totalNonStretchableWidth = 0.0;
+        var totalNonStretchableHeight = 0.0;
+
         stretchableChildrenCount = 0;
+        maxStretchableChildWidth = 0.0;
+        maxStretchableChildHeight = 0.0;
 
         for (var index = 0; index < childrenCount; index++)
         {
@@ -290,6 +264,10 @@ public class SpacedPanel : Panel
                 {
                     stretchableChildrenCount++;
                 }
+                else
+                {
+                    totalNonStretchableWidth += size.Width;
+                }
             }
             else
             {
@@ -301,23 +279,41 @@ public class SpacedPanel : Panel
                 {
                     stretchableChildrenCount++;
                 }
+                else
+                {
+                    totalNonStretchableHeight += size.Height;
+                }
             }
         }
 
         // Accounts for spacing and merging borders.
+        var additive = totalSpacing - totalThicknessToRemove;
+
         if (orientation is Orientation.Horizontal)
         {
-            width += totalSpacing - totalThicknessToRemove;
+            width = Math.Max(0.0, width + additive);
         }
         else
         {
-            height += totalSpacing - totalThicknessToRemove;
+            height = Math.Max(0.0, height + additive);
         }
 
-        measuredWidth = width;
-        measuredHeight = height;
+        // Console.WriteLine($"Measured: {width} x {height}");
 
-        // Console.WriteLine($"Measured: {measuredWidth} x {measuredHeight}");
+        // Calculates the maximum width and height for stretchable children based on the remaining space.
+        if (stretchableChildrenCount > 0)
+        {
+            totalNonStretchableWidth += additive;
+
+            if (orientation is Orientation.Horizontal)
+            {
+                maxStretchableChildWidth = (constraint.Width - totalNonStretchableWidth) / stretchableChildrenCount;
+            }
+            else
+            {
+                maxStretchableChildHeight = (constraint.Height - totalNonStretchableHeight) / stretchableChildrenCount;
+            }
+        }
 
         return new Size(width, height);
     }
@@ -349,8 +345,8 @@ public class SpacedPanel : Panel
         {
             // The available space for each child that is stretching is calculated based on the remaining space 
             // after the measured size of the panel, divided by the total number of children that are stretching.
-            stretchWidth = Math.Max(0.0, constraint.Width - measuredWidth) / stretchableChildrenCount;
-            stretchHeight = Math.Max(0.0, constraint.Height - measuredHeight) / stretchableChildrenCount;
+            stretchWidth = Math.Max(0.0, constraint.Width) / stretchableChildrenCount;
+            stretchHeight = Math.Max(0.0, constraint.Height) / stretchableChildrenCount;
         }
 
         // Console.WriteLine($"Stretchable: {stretchableChildrenCount} ({stretchWidth} x {stretchHeight})");
@@ -358,16 +354,6 @@ public class SpacedPanel : Panel
         var x = 0.0; // Holds the x-coordinate for the next child in the horizontal line.
         var y = 0.0; // Holds the y-coordinate for the next child in the vertical line.
 
-        // Adjust starting x or y based on Alignment and remaining space.
-        if (orientation is Orientation.Horizontal)
-        {
-            x = ComputeAlignmentOffset(measuredWidth, constraint.Width, Alignment);
-        }
-        else
-        {
-            y = ComputeAlignmentOffset(measuredHeight, constraint.Height, Alignment);
-        }
-        
         for (var index = 0; index < childrenCount; index++)
         {
             // Gets the child in the correct order.
@@ -381,7 +367,7 @@ public class SpacedPanel : Panel
             {
                 continue;
             }
-            
+
             var horizontalAlignment = (HorizontalAlignment)child.GetValue(HorizontalAlignmentProperty);
             var verticalAlignment = (VerticalAlignment)child.GetValue(VerticalAlignmentProperty);
 
@@ -403,8 +389,10 @@ public class SpacedPanel : Panel
                 {
                     // Adjusts the size of the child if it is stretching horizontally.
                     // The child is given the available width for stretching, respecting its maximum width.
-                    var maxWidth = (double)child.GetValue(MaxWidthProperty);
+                    var maxWidth = Math.Min(maxStretchableChildWidth, (double)child.GetValue(MaxWidthProperty));
                     size.Width = Math.Min(size.Width + stretchWidth, maxWidth);
+
+                    child.SetCurrentValue(MaxWidthProperty, size.Width);
                 }
 
                 child.Arrange(new Rect(x, yy, size.Width, size.Height));
@@ -438,8 +426,10 @@ public class SpacedPanel : Panel
                 {
                     // Adjusts the size of the child if it is stretching vertically.
                     // The child is given the available height for stretching, respecting its maximum height.
-                    var maxHeight = (double)child.GetValue(MaxHeightProperty);
+                    var maxHeight = Math.Min(maxStretchableChildHeight, (double)child.GetValue(MaxHeightProperty));
                     size.Height = Math.Min(size.Height + stretchHeight, maxHeight);
+
+                    child.SetCurrentValue(MaxHeightProperty, size.Height);
                 }
 
                 child.Arrange(new Rect(xx, y, size.Width, size.Height));
@@ -474,7 +464,7 @@ public class SpacedPanel : Panel
         {
             return true;
         }
-        
+
         switch (orientation)
         {
             case Orientation.Vertical when size.Height is 0.0 && !double.IsNaN((double)child.GetValue(HeightProperty)):
@@ -489,14 +479,14 @@ public class SpacedPanel : Panel
     {
         var offset = alignment switch
         {
-            Alignment.Middle or VerticalAlignment.Center or HorizontalAlignment.Center => (maxSize - size) * 0.5,
-            Alignment.End or VerticalAlignment.Bottom or HorizontalAlignment.Right=> maxSize - size,
+            VerticalAlignment.Center or HorizontalAlignment.Center => (maxSize - size) * 0.5,
+            VerticalAlignment.Bottom or HorizontalAlignment.Right => maxSize - size,
             _ => 0.0
         };
 
         return Math.Max(0.0, offset);
     }
-    
+
     private bool CanMergeAdjacentBorders(double spacing, double thickness) =>
         spacing is 0.0 && thickness > 0.0 && MergeAdjacentBorders;
 }
