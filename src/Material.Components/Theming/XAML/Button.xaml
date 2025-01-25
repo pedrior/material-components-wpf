@@ -63,11 +63,14 @@
                                             x:Name="Icon"
                                             Width="{TemplateBinding icons:IconAssist.Size}"
                                             Height="{TemplateBinding icons:IconAssist.Size}"
+                                            HorizontalAlignment="Center"
                                             VerticalAlignment="Center"
                                             AutoCollapse="True"
                                             RenderInvalidSymbol="False" />
 
                                         <ContentPresenter
+                                            x:Name="Content"
+                                            HorizontalAlignment="Center"
                                             VerticalAlignment="Center"
                                             Content="{TemplateBinding Content}"
                                             ContentStringFormat="{TemplateBinding ContentStringFormat}"
@@ -87,13 +90,21 @@
                             <Setter TargetName="Container" Property="SurfaceOpacity" Value="0.12" />
                         </Trigger>
 
-                        <DataTrigger Binding="{Binding ElementName=Icon, Path=IsRendered}" Value="True">
-                            <Setter TargetName="Panel" Property="Margin" Value="16,0,24,0" />
-                        </DataTrigger>
-
                         <Trigger Property="icons:IconAssist.Position" Value="Trailing">
                             <Setter TargetName="Panel" Property="ReverseOrder" Value="True" />
                         </Trigger>
+
+                        <Trigger Property="Content" Value="{x:Null}">
+                            <Setter TargetName="Content" Property="Visibility" Value="Collapsed" />
+                        </Trigger>
+
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding ElementName=Icon, Path=IsRendered}" Value="True" />
+                                <Condition Binding="{Binding ElementName=Content, Path=Visibility}" Value="Visible" />
+                            </MultiDataTrigger.Conditions>
+                            <Setter TargetName="Panel" Property="Margin" Value="16,0,24,0" />
+                        </MultiDataTrigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
