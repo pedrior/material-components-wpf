@@ -99,9 +99,19 @@
                         <MultiDataTrigger>
                             <MultiDataTrigger.Conditions>
                                 <Condition Binding="{Binding ElementName=Icon, Path=IsRendered}" Value="True" />
+                                <Condition Binding="{Binding ElementName=Panel, Path=ReverseOrder}" Value="False" />
                                 <Condition Binding="{Binding ElementName=Content, Path=Visibility}" Value="Visible" />
                             </MultiDataTrigger.Conditions>
                             <Setter TargetName="Panel" Property="Margin" Value="16,0,24,0" />
+                        </MultiDataTrigger>
+
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding ElementName=Icon, Path=IsRendered}" Value="True" />
+                                <Condition Binding="{Binding ElementName=Panel, Path=ReverseOrder}" Value="True" />
+                                <Condition Binding="{Binding ElementName=Content, Path=Visibility}" Value="Visible" />
+                            </MultiDataTrigger.Conditions>
+                            <Setter TargetName="Panel" Property="Margin" Value="24,0,16,0" />
                         </MultiDataTrigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
