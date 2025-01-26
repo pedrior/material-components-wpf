@@ -153,6 +153,7 @@ public sealed class ThemeManager
         MergeResourceDictionary(new ResourceDictionary { Source = XamlHelper.MakeUri("Container.xaml") });
         MergeResourceDictionary(new ResourceDictionary { Source = XamlHelper.MakeUri("Divider.xaml") });
         MergeResourceDictionary(new ResourceDictionary { Source = XamlHelper.MakeUri("FocusIndicator.xaml") });
+        MergeResourceDictionary(new ResourceDictionary { Source = XamlHelper.MakeUri("IconButton.xaml") });
         MergeResourceDictionary(new ResourceDictionary { Source = XamlHelper.MakeUri("NavigationRailItem.xaml") });
         MergeResourceDictionary(new ResourceDictionary { Source = XamlHelper.MakeUri("NavigationRail.xaml") });
         MergeResourceDictionary(new ResourceDictionary { Source = XamlHelper.MakeUri("NavigationRailActions.xaml") });
