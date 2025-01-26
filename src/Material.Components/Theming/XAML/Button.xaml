@@ -31,12 +31,12 @@
         <Setter Property="icons:IconAssist.Position" Value="Leading" />
         <Setter Property="shapes:ShapeAssist.Style" Value="Full" />
         <Setter Property="layout:LayoutAssist.Spacing" Value="8" />
-        <Setter Property="interaction:InteractionAssist.FocusIndicatorBrush" Value="{DynamicResource MaterialColorPrimary}" />
+        <Setter Property="controls:FocusIndicator.Brush" Value="{DynamicResource MaterialColorSecondary}" />
         <Setter Property="interaction:InteractionAssist.RippleTint" Value="{Binding RelativeSource={RelativeSource Self}, Path=Foreground}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type controls:Button}">
-                    <controls:FocusIndicator DefiningGeometry="{Binding ElementName=Container, Path=SurfaceGeometry}">
+                    <controls:FocusIndicator Shape="{Binding ElementName=Container, Path=SurfaceGeometry}">
                         <controls:StateLayer
                             DefiningGeometry="{Binding ElementName=Container, Path=SurfaceGeometry}"
                             IsHovered="{TemplateBinding IsMouseOver}"

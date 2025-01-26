@@ -6,32 +6,35 @@ using System.Windows.Media;
 namespace Material.Components.Controls;
 
 /// <summary>
-/// Represents a visual indicator that highlights a UI element when it receives focus.
+/// Provides a visual focus indicator that highlights a UI element when it gains focus, providing
+/// clear and customizable visual feedback to enhance user interaction and accessibility.
 /// </summary>
 /// <remarks>
-/// The <see cref="FocusIndicator"/> provides a customizable focus effect for UI elements. 
-/// It displays a custom indicator around the focused element to give users clear visual feedback. 
+/// The <see cref="FocusIndicator"/> can be used in two primary ways:  
+/// <list type="bullet">
+/// <item>
+/// <term>Standalone Control:</term>
+/// <description>
+/// When used as a standalone control, the focus indicator monitors and responds to 
+/// focus events on its child element.
+/// </description>
+/// </item>
+/// <item>
+/// <term>Within a Templated Parent:</term>
+/// <description>
+/// When used inside a templated parent (e.g., within a <see cref="System.Windows.Controls.ControlTemplate"/>), 
+/// the focus indicator monitors and responds to focus events on its templated parent element.
+/// </description>
+/// </item>
+/// </list>
 /// </remarks>
 public class FocusIndicator : DrawableContainer
 {
     /// <summary>
-    /// Identifies the <see cref="Brush"/> dependency property.
+    /// Identifies the <see cref="Shape"/> dependency property.
     /// </summary>
-    public static readonly DependencyProperty BrushProperty = DependencyProperty.Register(
-        nameof(Brush),
-        typeof(Brush),
-        typeof(FocusIndicator),
-        new FrameworkPropertyMetadata(
-            Brushes.Black,
-            FrameworkPropertyMetadataOptions.AffectsRender |
-            FrameworkPropertyMetadataOptions.SubPropertiesDoNotAffectRender,
-            OnBrushChanged));
-
-    /// <summary>
-    /// Identifies the <see cref="DefiningGeometry"/> dependency property.
-    /// </summary>
-    public static readonly DependencyProperty DefiningGeometryProperty = DependencyProperty.Register(
-        nameof(DefiningGeometry),
+    public static readonly DependencyProperty ShapeProperty = DependencyProperty.Register(
+        nameof(Shape),
         typeof(Geometry),
         typeof(FocusIndicator),
         new FrameworkPropertyMetadata(
@@ -40,48 +43,64 @@ public class FocusIndicator : DrawableContainer
             OnDefiningGeometryChanged));
 
     /// <summary>
-    /// Identifies the <see cref="Padding"/> dependency property.
+    /// Identifies the <c>Brush</c> attached dependency property.
     /// </summary>
-    public static readonly DependencyProperty PaddingProperty = DependencyProperty.Register(
-        nameof(Padding),
-        typeof(double),
+    public static readonly DependencyProperty BrushProperty = DependencyProperty.RegisterAttached(
+        nameof(Brush),
+        typeof(Brush),
         typeof(FocusIndicator),
         new FrameworkPropertyMetadata(
-            4.0,
-            FrameworkPropertyMetadataOptions.AffectsRender,
-            OnPaddingChanged),
-        ValidatePadding);
+            Brushes.Black,
+            FrameworkPropertyMetadataOptions.AffectsRender |
+            FrameworkPropertyMetadataOptions.SubPropertiesDoNotAffectRender,
+            OnStrokeChanged));
 
     /// <summary>
-    /// Identifies the <see cref="Thickness"/> dependency property.
+    /// Identifies the<c>Offset</c> attached dependency property.
     /// </summary>
-    public static readonly DependencyProperty ThicknessProperty = DependencyProperty.Register(
-        nameof(Thickness),
+    public static readonly DependencyProperty OffsetProperty = DependencyProperty.RegisterAttached(
+        nameof(Offset),
         typeof(double),
         typeof(FocusIndicator),
         new FrameworkPropertyMetadata(
             2.0,
+            FrameworkPropertyMetadataOptions.Inherits |
             FrameworkPropertyMetadataOptions.AffectsRender,
-            OnThicknessChanged,
-            CoerceThickness),
+            OnOffsetChanged),
+        ValidateOffset);
+
+    /// <summary>
+    /// Identifies the <c>Thickness</c> attached dependency property.
+    /// </summary>
+    public static readonly DependencyProperty ThicknessProperty = DependencyProperty.RegisterAttached(
+        nameof(Thickness),
+        typeof(double),
+        typeof(FocusIndicator),
+        new FrameworkPropertyMetadata(
+            3.0,
+            FrameworkPropertyMetadataOptions.Inherits |
+            FrameworkPropertyMetadataOptions.AffectsRender,
+            OnThicknessChanged),
         ValidateThickness);
 
     /// <summary>
-    /// Identifies the <see cref="Device"/> dependency property.
+    /// Identifies the <c>Device</c> attached dependency property.
     /// </summary>
-    public static readonly DependencyProperty DeviceProperty = DependencyProperty.Register(
+    public static readonly DependencyProperty DeviceProperty = DependencyProperty.RegisterAttached(
         nameof(Device),
         typeof(FocusDevice),
         typeof(FocusIndicator),
-        new PropertyMetadata(FocusDevice.Keyboard));
+        new FrameworkPropertyMetadata(FocusDevice.Keyboard));
 
-    private bool gotFocus;
+    private Pen? pen;
+    private Geometry? geometry;
 
-    private Pen? borderPen;
-    private Geometry? renderGeometry;
-
+    private bool isFocused;
     private bool isCreatedThroughTemplate;
 
+    /// <summary>
+    /// Initializes static members of the <see cref="FocusIndicator"/> class.
+    /// </summary>
     static FocusIndicator()
     {
         DefaultStyleKeyProperty.OverrideMetadata(
@@ -89,26 +108,41 @@ public class FocusIndicator : DrawableContainer
             new FrameworkPropertyMetadata(typeof(FocusIndicator)));
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="FocusIndicator"/> class.
+    /// </summary>
     public FocusIndicator()
     {
         Loaded += OnLoaded;
         Unloaded += OnUnloaded;
 
+        // Disable hit testing for the focus indicator.
         VisualLayer.IsHitTestVisible = false;
     }
 
     /// <summary>
-    /// Gets or sets the brush used to paint the focus indicator.
+    /// Gets or sets the geometry used to define the shape of the focus indicator.
     /// </summary>
+    /// <value>A <see cref="Geometry"/> object representing the shape.</value>
     /// <remarks>
-    /// The <see cref="Brush"/> property determines the color or gradient used for the focus indicator.  
-    /// This allows customization of the indicator's appearance to match the application's theme.  
-    /// If not set, the default color is <see cref="Brushes.Black"/>.
+    /// In instances where no geometry has been specified, a default rectangle geometry is used
+    /// as a fallback, with the dimensions based on the element's bounds.
     /// </remarks>
-    /// <value>
-    /// A <see cref="Brush"/> that defines the color of the focus indicator.  
+    [Bindable(true)]
+    [Category("Appearance")]
+    public Geometry? Shape
+    {
+        get => (Geometry?)GetValue(ShapeProperty);
+        set => SetValue(ShapeProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the brush that defines the color or style of the focus indicator.
+    /// </summary>
+    /// <value>A <see cref="System.Windows.Media.Brush"/> used to render the focus indicator.</value>
+    /// <remarks>
     /// The default value is <see cref="Brushes.Black"/>.
-    /// </value>
+    /// </remarks>
     [Bindable(true)]
     [Category("Brush")]
     public Brush? Brush
@@ -118,37 +152,12 @@ public class FocusIndicator : DrawableContainer
     }
 
     /// <summary>
-    /// Gets or sets the geometric shape used to define the focus indicator shape.
+    /// Gets or sets the thickness of the focus indicator.
     /// </summary>
+    /// <value>A non-negative and finite <see cref="double"/> representing the border thickness.</value>
     /// <remarks>
-    /// By default, the focus indicator uses a rectangular shape.  
-    /// You can customize this shape by providing a different <see cref="Geometry"/>.  
-    /// If not set, the focus indicator uses <see langword="null"/>.
+    /// The default value is <c>3.0</c>.
     /// </remarks>
-    /// <value>
-    /// A <see cref="Geometry"/> object that defines the shape of the focus indicator.  
-    /// The default value is <see langword="null"/>.
-    /// </value>
-    [Bindable(true)]
-    [Category("Appearance")]
-    public Geometry? DefiningGeometry
-    {
-        get => (Geometry?)GetValue(DefiningGeometryProperty);
-        set => SetValue(DefiningGeometryProperty, value);
-    }
-
-    /// <summary>
-    /// Gets or sets the thickness of the focus indicator..
-    /// </summary>
-    /// <remarks>
-    /// The <see cref="Thickness"/> property defines the width of the focus border.  
-    /// A thicker border makes the focus indicator more prominent.  
-    /// This property must be a non-negative value.
-    /// </remarks>
-    /// <value>
-    /// A <see cref="double"/> specifying the border thickness.  
-    /// The default value is <c>2.0</c>.
-    /// </value>
     [Bindable(true)]
     [Category("Appearance")]
     public double Thickness
@@ -158,37 +167,31 @@ public class FocusIndicator : DrawableContainer
     }
 
     /// <summary>
-    /// Gets or sets the padding between the focused element and the focus indicator.
+    /// Gets or sets the offset of the focus indicator to the boundaries defined by the <see cref="Shape"/>.
     /// </summary>
+    /// <value>A non-negative and finite <see cref="double"/> value representing the offset distance.</value>
     /// <remarks>
-    /// The <see cref="Padding"/> property defines the space between the focus indicator and the element it surrounds.  
-    /// This property can be used to offset the indicator for design consistency.  
-    /// Must be a non-negative value.
+    /// The default value is <c>2.0</c>.
     /// </remarks>
-    /// <value>
-    /// A <see cref="double"/> specifying the padding between the focus indicator and the focused element. 
-    /// The default value is <c>4.0</c>.
-    /// </value>
     [Bindable(true)]
     [Category("Appearance")]
-    public double Padding
+    public double Offset
     {
-        get => (double)GetValue(PaddingProperty);
-        set => SetValue(PaddingProperty, value);
+        get => (double)GetValue(OffsetProperty);
+        set => SetValue(OffsetProperty, value);
     }
 
     /// <summary>
-    /// Gets or sets the input device type that can trigger the focus indicator.
+    /// Gets or sets the input device that triggers the focus indicator.
     /// </summary>
+    /// <value>A <see cref="FocusDevice"/> indicating the source of focus.</value>
     /// <remarks>
-    /// The <see cref="Device"/> property specifies whether the focus indicator responds to focus changes 
-    /// triggered an input device.  
-    /// By default, the focus indicator responds only to keyboard interactions.
+    /// <para>The default value is <see cref="FocusDevice.Keyboard"/>.</para>
+    /// <para>
+    /// Programmatic focus (e.g., calling <see cref="UIElement.Focus"/> or <see cref="Keyboard.Focus"/>)
+    /// activates the focus indicator regardless of the device.
+    /// </para>
     /// </remarks>
-    /// <value>
-    /// A <see cref="FocusDevice"/> value that determines which input devices can activate the focus indicator.  
-    /// The default value is <see cref="FocusDevice.Keyboard"/>.
-    /// </value>
     [Bindable(true)]
     [Category("Common")]
     public FocusDevice Device
@@ -199,29 +202,132 @@ public class FocusIndicator : DrawableContainer
 
     protected override DrawableContainerOrder Order => DrawableContainerOrder.ChildThenVisual;
 
+    /// <summary>
+    /// Gets the value of the <see cref="BrushProperty"/> for the specified <see cref="DependencyObject"/>.
+    /// </summary>
+    /// <param name="element">The element from which to retrieve the value.</param>
+    /// <remarks>
+    /// The <c>Brush</c> attached property defines the color or style of the focus indicator.
+    /// The default value is <see cref="Brushes.Black"/>.
+    /// </remarks>
+    /// <returns>
+    /// The value of the <see cref="BrushProperty"/> for the specified <see cref="DependencyObject"/>.
+    /// </returns>
+    public static Brush? GetBrush(DependencyObject element) => (Brush?)element.GetValue(BrushProperty);
+
+    /// <summary>
+    /// Sets the value of the <see cref="BrushProperty"/> for the specified <see cref="DependencyObject"/>.
+    /// </summary>
+    /// <param name="element">The element to which the value will be set.</param>
+    /// <param name="value">The value to set.</param>
+    /// <remarks>
+    /// The <c>Brush</c> attached property defines the color or style of the focus indicator.
+    /// The default value is <see cref="Brushes.Black"/>.
+    /// </remarks>
+    public static void SetBrush(DependencyObject element, Brush? value) => element.SetValue(BrushProperty, value);
+
+    /// <summary>
+    /// Gets the value of the <see cref="OffsetProperty"/> for the specified <see cref="DependencyObject"/>.
+    /// </summary>
+    /// <param name="element">The element from which to retrieve the value.</param>
+    /// <remarks>
+    /// The <c>Offset</c> attached property specifies the offset of the focus indicator to the boundaries
+    /// defined by the <see cref="Shape"/>. The default value is <c>2.0</c>.
+    /// </remarks>
+    /// <returns>
+    /// The value of the <see cref="OffsetProperty"/> for the specified <see cref="DependencyObject"/>.
+    /// </returns>
+    public static double GetOffset(DependencyObject element) => (double)element.GetValue(OffsetProperty);
+
+    /// <summary>
+    /// Sets the value of the <see cref="OffsetProperty"/> for the specified <see cref="DependencyObject"/>.
+    /// </summary>
+    /// <param name="element">The element to which the value will be set.</param>
+    /// <param name="value">The value to set.</param>
+    /// <remarks>
+    /// The <c>Offset</c> attached property specifies the offset of the focus indicator to the boundaries
+    /// defined by the <see cref="Shape"/>. The default value is <c>2.0</c>.
+    /// </remarks>
+    public static void SetOffset(DependencyObject element, double value) => element.SetValue(OffsetProperty, value);
+
+    /// <summary>
+    /// Gets the value of the <see cref="ThicknessProperty"/> for the specified <see cref="DependencyObject"/>.
+    /// </summary>
+    /// <param name="element">The element from which to retrieve the value.</param>
+    /// <remarks>
+    /// The <c>Offset</c> attached property specifies the thickness of the focus indicator.  
+    /// The default value is <c>3.0</c>.
+    /// </remarks>
+    /// <returns>
+    /// The value of the <see cref="ThicknessProperty"/> for the specified <see cref="DependencyObject"/>.
+    /// </returns>
+    public static double GetThickness(DependencyObject element) => (double)element.GetValue(ThicknessProperty);
+
+    /// <summary>
+    /// Sets the value of the <see cref="ThicknessProperty"/> for the specified <see cref="DependencyObject"/>.
+    /// </summary>
+    /// <param name="element">The element to which the value will be set.</param>
+    /// <param name="value">The value to set.</param>
+    /// <remarks>
+    /// The <c>Offset</c> attached property specifies the thickness of the focus indicator.  
+    /// The default value is <c>3.0</c>.
+    /// </remarks>
+    public static void SetThickness(DependencyObject element, double value) =>
+        element.SetValue(ThicknessProperty, value);
+
+    /// <summary>
+    /// Gets the value of the <see cref="DeviceProperty"/> for the specified <see cref="DependencyObject"/>.
+    /// </summary>
+    /// <param name="element">The element from which to retrieve the value.</param>
+    /// <remarks>
+    /// The <c>Device</c> attached property specifies the input device that triggers the focus indicator.  
+    /// The default value is <see cref="FocusDevice.Keyboard"/>.
+    /// </remarks>
+    /// <returns>
+    /// The value of the <see cref="DeviceProperty"/> for the specified <see cref="DependencyObject"/>.
+    /// </returns>
+    public static FocusDevice GetDevice(DependencyObject element) => (FocusDevice)element.GetValue(DeviceProperty);
+
+    /// <summary>
+    /// Sets the value of the <see cref="DeviceProperty"/> for the specified <see cref="DependencyObject"/>.
+    /// </summary>
+    /// <param name="element">The element to which the value will be set.</param>
+    /// <param name="value">The value to set.</param>
+    /// <remarks>
+    /// The <c>Device</c> attached property specifies the input device that triggers the focus indicator.  
+    /// The default value is <see cref="FocusDevice.Keyboard"/>.
+    /// </remarks>
+    public static void SetDevice(DependencyObject element, FocusDevice value) =>
+        element.SetValue(DeviceProperty, value);
+
+    private static bool ValidateOffset(object value) => 
+        value is double v and >= 0.0 && !double.IsNaN(v) && !double.IsInfinity(v);
+    
+    private static bool ValidateThickness(object value) => 
+        value is double v and >= 0.0 && !double.IsNaN(v) && !double.IsInfinity(v);
+    
     protected sealed override void OnVisualLayerRender(DrawingContext context)
     {
         base.OnVisualLayerRender(context);
 
-        if (!gotFocus)
+        if (!isFocused)
         {
-            // By returning early, we avoid rendering the indicator.
             return;
         }
 
         var thickness = Thickness;
 
-        if (borderPen is null)
+        if (pen is null)
         {
-            EnsureBorderPen(thickness);
+            CreatePen(thickness);
         }
 
-        if (renderGeometry is null || RenderSizeHasChanged)
+        if (geometry is null || RenderSizeHasChanged)
         {
-            EnsureRenderGeometry(Padding, thickness);
+            geometry = CreateGeometry(thickness, Offset);
         }
 
-        context.DrawGeometry(brush: null, borderPen, renderGeometry);
+        context.DrawGeometry(brush: null, pen, geometry);
     }
 
     protected override void OnVisualChildrenChanged(DependencyObject visualAdded, DependencyObject visualRemoved)
@@ -236,11 +342,13 @@ public class FocusIndicator : DrawableContainer
         if (visualRemoved is UIElement oldElement)
         {
             UnsubscribedFromEvents(oldElement);
+            SetIsFocused(false);
         }
 
         if (visualAdded is UIElement newElement)
         {
             SubscribeToEvents(newElement);
+            SetIsFocused(newElement.IsFocused);
         }
     }
 
@@ -256,52 +364,33 @@ public class FocusIndicator : DrawableContainer
         if (oldParent is UIElement oldElement)
         {
             UnsubscribedFromEvents(oldElement);
+            SetIsFocused(false);
         }
 
         if (VisualParent is UIElement newElement)
         {
             SubscribeToEvents(newElement);
+            SetIsFocused(newElement.IsFocused);
         }
     }
-    
-    internal static object CoerceThickness(DependencyObject _, object value) => Math.Max(0.0, (double)value);
 
-    internal static bool ValidatePadding(object value)
-    {
-        var padding = (double)value;
-        return !double.IsNaN(padding) && !double.IsInfinity(padding);
-    }
-
-    internal static bool ValidateThickness(object value)
-    {
-        var thickness = (double)value;
-        return !double.IsNaN(thickness) && !double.IsInfinity(thickness);
-    }
-
-    private static void OnBrushChanged(DependencyObject element, DependencyPropertyChangedEventArgs e) =>
-        ((FocusIndicator)element).InvalidateBorderPen();
+    private static void OnStrokeChanged(DependencyObject element, DependencyPropertyChangedEventArgs e) =>
+        (element as FocusIndicator)?.InvalidatePen();
 
     private static void OnDefiningGeometryChanged(DependencyObject element, DependencyPropertyChangedEventArgs e) =>
-        ((FocusIndicator)element).InvalidateRenderGeometry();
+        (element as FocusIndicator)?.InvalidateGeometry();
 
-    private static void OnPaddingChanged(DependencyObject element, DependencyPropertyChangedEventArgs e) =>
-        ((FocusIndicator)element).InvalidateRenderGeometry();
+    private static void OnOffsetChanged(DependencyObject element, DependencyPropertyChangedEventArgs e) =>
+        (element as FocusIndicator)?.InvalidateGeometry();
 
     private static void OnThicknessChanged(DependencyObject element, DependencyPropertyChangedEventArgs e)
     {
         if (element is FocusIndicator indicator)
         {
-            indicator.InvalidateBorderPen();
-            indicator.InvalidateRenderGeometry();
+            indicator.InvalidatePen();
+            indicator.InvalidateGeometry();
         }
     }
-
-    private static bool CheckInputDeviceAgainstFocusDevice(FocusDevice device, InputDevice? input) => device switch
-    {
-        FocusDevice.Keyboard => input is KeyboardDevice,
-        FocusDevice.Mouse => input is MouseDevice,
-        _ => true // focused programmatically
-    };
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
@@ -310,11 +399,14 @@ public class FocusIndicator : DrawableContainer
         if (TemplatedParent is UIElement parent)
         {
             SubscribeToEvents(parent);
+            SetIsFocused(parent.IsFocused);
+
             isCreatedThroughTemplate = true;
         }
         else if (Child is not null)
         {
             SubscribeToEvents(Child);
+            SetIsFocused(Child.IsFocused);
         }
     }
 
@@ -344,61 +436,68 @@ public class FocusIndicator : DrawableContainer
         element.LostFocus -= OnSubscribedElementLostFocus;
     }
 
-    private void OnSubscribedElementGotFocus(object sender, RoutedEventArgs e)
+    private void OnSubscribedElementGotFocus(object sender, RoutedEventArgs e) => UpdateFocusState();
+
+    private void OnSubscribedElementLostFocus(object sender, RoutedEventArgs e) => SetIsFocused(false);
+
+    private void UpdateFocusState()
     {
-        var mostRecentInputDevice = InputManager.Current.MostRecentInputDevice;
-        SetGotFocus(CheckInputDeviceAgainstFocusDevice(Device, mostRecentInputDevice));
+        var inputDevice = InputManager.Current.MostRecentInputDevice;
+        SetIsFocused(inputDevice is null || (Device, inputDevice) switch
+        {
+            (FocusDevice.Keyboard, KeyboardDevice) => true,
+            (FocusDevice.Mouse, MouseDevice) => true,
+            _ => false
+        });
     }
 
-    private void OnSubscribedElementLostFocus(object sender, RoutedEventArgs e) => SetGotFocus(false);
-
-    private void SetGotFocus(bool value)
+    private void SetIsFocused(bool value)
     {
-        if (gotFocus == value)
+        if (isFocused == value)
         {
             return;
         }
 
-        gotFocus = value;
+        isFocused = value;
 
         InvalidateVisual();
     }
 
-    private void InvalidateBorderPen() => borderPen = null;
+    private void InvalidatePen() => pen = null;
 
-    private void InvalidateRenderGeometry() => renderGeometry = null;
+    private void InvalidateGeometry() => geometry = null;
 
-    private void EnsureBorderPen(double thickness)
+    private void CreatePen(double thickness)
     {
-        borderPen = new Pen(Brush, thickness);
-        borderPen.Freeze();
+        pen = new Pen(Brush, thickness);
+        pen.Freeze();
     }
 
-    private void EnsureRenderGeometry(double padding, double thickness)
+    private Geometry CreateGeometry(double thickness, double offset)
     {
-        var geometry = DefiningGeometry;
-        if (geometry is null || geometry.IsEmpty())
+        var shape = Shape;
+        if (shape is null || shape.IsEmpty())
         {
-            geometry = new RectangleGeometry(new Rect(RenderSize));
+            shape = new RectangleGeometry(new Rect(RenderSize));
         }
 
-        if (geometry.IsFrozen)
+        if (shape.IsFrozen)
         {
-            geometry = geometry.Clone();
+            shape = shape.Clone();
         }
 
-        var width = geometry.Bounds.Width;
-        var height = geometry.Bounds.Height;
+        var width = shape.Bounds.Width;
+        var height = shape.Bounds.Height;
 
-        // Inflate the geometry by scaling
-        geometry.Transform = new ScaleTransform(
-            scaleX: 1.0 + (thickness + padding) / width,
-            scaleY: 1.0 + (thickness + padding) / height,
+        // Scale to include the thickness and offset.
+        shape.Transform = new ScaleTransform(
+            scaleX: 1.0 + (thickness + offset * 2) / width,
+            scaleY: 1.0 + (thickness + offset * 2) / height,
             centerX: width * 0.5,
             centerY: height * 0.5);
 
-        geometry.Freeze();
+        shape.Freeze();
 
-        renderGeometry = geometry;
+        return shape;
     }
 }
