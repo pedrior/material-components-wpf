@@ -160,6 +160,7 @@ public sealed class ThemeManager
         MergeResourceDictionary(new ResourceDictionary { Source = XamlHelper.MakeUri("Ripple.xaml") });
         MergeResourceDictionary(new ResourceDictionary { Source = XamlHelper.MakeUri("StateLayer.xaml") });
         MergeResourceDictionary(new ResourceDictionary { Source = XamlHelper.MakeUri("SymbolIcon.xaml") });
+        MergeResourceDictionary(new ResourceDictionary { Source = XamlHelper.MakeUri("ToggleIconButton.xaml") });
     }
 
     private void InsertRobotoFontResource()

@@ -22,6 +22,15 @@ public static class IconAssist
         typeof(Symbol),
         typeof(IconAssist),
         new FrameworkPropertyMetadata((Symbol)SymbolIcon.NotDefinedSymbol));
+    
+    /// <summary>
+    /// Identifies the <c>SelectSymbol</c> attached property.
+    /// </summary>
+    public static readonly DependencyProperty SelectSymbolProperty = DependencyProperty.RegisterAttached(
+        "SelectSymbol",
+        typeof(Symbol),
+        typeof(IconAssist),
+        new FrameworkPropertyMetadata((Symbol)SymbolIcon.NotDefinedSymbol));
 
     /// <summary>
     /// Identifies the <c>Kind</c> attached property.
@@ -84,7 +93,7 @@ public static class IconAssist
     /// <param name="value">The <see cref="Symbol"/> to be displayed.</param>
     /// <remarks>
     /// Assigns a specific symbol to a UI element, enabling it to render a Material Symbol icon.
-    /// <para>The default value is a <c>NotDefinedSymbol</c> symbol, an invalid symbol..</para>
+    /// <para>The default value is a <c>NotDefinedSymbol</c> symbol, an invalid symbol.</para>
     /// </remarks>
     public static void SetSymbol(DependencyObject element, Symbol value) => element.SetValue(SymbolProperty, value);
 
@@ -95,6 +104,27 @@ public static class IconAssist
     /// <returns>The <see cref="Symbol"/> assigned to the element.</returns>
     /// <remarks>The default value is an undefined glyph.</remarks>
     public static Symbol GetSymbol(DependencyObject element) => (Symbol)element.GetValue(SymbolProperty);
+    
+    /// <summary>
+    /// Sets the value of the <see cref="SelectSymbolProperty"/> attached property for the specified element.
+    /// </summary>
+    /// <param name="element">The <see cref="DependencyObject"/> for which to set the property value.</param>
+    /// <param name="value">The <see cref="Symbol"/> to be displayed in a selected state.</param>
+    /// <remarks>
+    /// Assigns a specific symbol to a UI element to indicate a selected state, enabling it to render a Material
+    /// Symbol icon.
+    /// <para>The default value is a <c>NotDefinedSymbol</c> symbol, an invalid symbol.</para>
+    /// </remarks>
+    public static void SetSelectSymbol(DependencyObject element, Symbol value) => 
+        element.SetValue(SelectSymbolProperty, value);
+
+    /// <summary>
+    /// Gets the value of the <see cref="SelectSymbolProperty"/> attached property for the specified element.
+    /// </summary>
+    /// <param name="element">The <see cref="DependencyObject"/> for which to retrieve the property value.</param>
+    /// <returns>The <see cref="Symbol"/> assigned to the element.</returns>
+    /// <remarks>The default value is an undefined glyph.</remarks>
+    public static Symbol GetSelectSymbol(DependencyObject element) => (Symbol)element.GetValue(SelectSymbolProperty);
 
     /// <summary>
     /// Sets the value of the <see cref="KindProperty"/> attached property for the specified element.
