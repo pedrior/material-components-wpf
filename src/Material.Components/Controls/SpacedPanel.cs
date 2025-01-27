@@ -1,31 +1,23 @@
-using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
-
-// #if DEBUG
-// using System.Windows.Media;
-// #endif
 
 namespace Material.Components.Controls;
 
 /// <summary>
-/// Represents a lightweight panel that arranges its child elements in a single line, either horizontally or
-/// vertically, with configurable spacing, alignment, and other layout properties.
+/// Represents a panel that arranges its children in a single line, either horizontally or vertically.
+/// Supports advanced layout features such as alignment, spacing, stretching, reverse order, and merging
+/// of adjacent borders.
 /// </summary>
 public class SpacedPanel : Panel
 {
     /// <summary>
-    /// Identifies the <see cref="Spacing"/> dependency property.
+    /// Identifies the <see cref="Alignment"/> dependency property.
     /// </summary>
-    public static readonly DependencyProperty SpacingProperty = DependencyProperty.Register(
-        nameof(Spacing),
-        typeof(double),
+    public static readonly DependencyProperty AlignmentProperty = DependencyProperty.Register(
+        nameof(Alignment),
+        typeof(Alignment),
         typeof(SpacedPanel),
-        new FrameworkPropertyMetadata(
-            0.0,
-            FrameworkPropertyMetadataOptions.AffectsMeasure,
-            propertyChangedCallback: null,
-            CoerceSpacing));
+        new FrameworkPropertyMetadata(Alignment.Start, FrameworkPropertyMetadataOptions.AffectsArrange));
 
     /// <summary>
     /// Identifies the <see cref="Orientation"/> dependency property.
@@ -34,7 +26,19 @@ public class SpacedPanel : Panel
         nameof(Orientation),
         typeof(Orientation),
         typeof(SpacedPanel),
-        new FrameworkPropertyMetadata(Orientation.Horizontal, FrameworkPropertyMetadataOptions.AffectsMeasure));
+        new FrameworkPropertyMetadata(
+            Orientation.Horizontal,
+            FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsArrange));
+
+    /// <summary>
+    /// Identifies the <see cref="Spacing"/> dependency property.
+    /// </summary>
+    public static readonly DependencyProperty SpacingProperty = DependencyProperty.Register(
+        nameof(Spacing),
+        typeof(double),
+        typeof(SpacedPanel),
+        new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsMeasure),
+        ValidateSpacing);
 
     /// <summary>
     /// Identifies the <see cref="ReverseOrder"/> dependency property.
@@ -61,17 +65,25 @@ public class SpacedPanel : Panel
         nameof(UniformChildrenThickness),
         typeof(double),
         typeof(SpacedPanel),
+        new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsMeasure),
+        ValidateUniformChildrenThickness);
+
+    /// <summary>
+    /// Identifies the <c>Stretch</c> attached dependency property.
+    /// </summary>
+    public static readonly DependencyProperty StretchProperty = DependencyProperty.RegisterAttached(
+        "Stretch",
+        typeof(bool),
+        typeof(SpacedPanel),
         new FrameworkPropertyMetadata(
-            0.0,
-            FrameworkPropertyMetadataOptions.AffectsMeasure,
-            propertyChangedCallback: null,
-            CoerceThickness));
+            false, FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsArrange));
 
     private static readonly Size InfiniteConstraint = new(double.PositiveInfinity, double.PositiveInfinity);
 
-    private int stretchableChildrenCount; // Total children that specify stretch alignment.
-    private double maxStretchableChildWidth; // The maximum width that a stretchable child can have.
-    private double maxStretchableChildHeight; // The maximum height that a stretchable child can have.
+    private double measuredWidth;
+    private double measuredHeight;
+
+    private int stretchCount;
 
     /// <summary>
     /// Initializes static members of the <see cref="SpacedPanel"/> class.
@@ -84,36 +96,28 @@ public class SpacedPanel : Panel
     }
 
     /// <summary>
-    /// Gets or sets the amount of spacing between child elements in the panel.
+    /// Gets or sets the alignment of children within the panel, indicating whether they are aligned
+    /// to the start, center, or end of the panel.
     /// </summary>
     /// <remarks>
-    /// The <see cref="Spacing"/> property defines the amount of space, in device-independent units (DIPs),
-    /// to insert between child elements. Increasing this value will space out the elements further apart.
+    /// If the panel has stretchable children, it will behave like <see cref="Alignment.Start"/>.
     /// </remarks>
     /// <value>
-    /// A <see cref="double"/> representing the spacing between child elements. The default value is <c>0.0</c>.
+    /// One of the <see cref="Alignment"/> values. The default is <see cref="Alignment.Start"/>.
     /// </value>
-    [Bindable(true)]
-    [Category("Layout")]
-    public double Spacing
+    public Alignment Alignment
     {
-        get => (double)GetValue(SpacingProperty);
-        set => SetValue(SpacingProperty, value);
+        get => (Alignment)GetValue(AlignmentProperty);
+        set => SetValue(AlignmentProperty, value);
     }
 
     /// <summary>
-    /// Gets or sets the orientation describing how the panel arranges its child elements.
-    /// </summary>
-    /// <remarks>
-    /// The <see cref="Orientation"/> property determines whether the panel arranges its child elements
+    /// Gets or sets the orientation of the panel, indicating whether the children are arranged
     /// horizontally or vertically.
-    /// </remarks>
+    /// </summary>
     /// <value>
-    /// One of the <see cref="Orientation"/> enumeration values that specifies the orientation of the panel.
-    /// The default value is <see cref="Orientation.Horizontal"/>.
+    /// One of the <see cref="Orientation"/> values. The default is <see cref="Orientation.Horizontal"/>.
     /// </value>
-    [Bindable(true)]
-    [Category("Layout")]
     public Orientation Orientation
     {
         get => (Orientation)GetValue(OrientationProperty);
@@ -121,20 +125,31 @@ public class SpacedPanel : Panel
     }
 
     /// <summary>
-    /// Gets or sets a value indicating whether the order of the child elements should be reversed.
+    /// Gets or sets the spacing between children.
     /// </summary>
     /// <remarks>
-    /// The <see cref="ReverseOrder"/> property, when set to <see langword="true"/>, causes the panel to arrange
-    /// its child elements in reverse order. This can be useful for scenarios where the display order of elements
-    /// needs to be inverted.
+    /// If a child is collapsed or has a desired size of <c>0.0</c> and is not stretchable,
+    /// it will be skipped and the spacing will be reduced accordingly.
     /// </remarks>
     /// <value>
-    /// A <see cref="bool"/> value indicating whether the child elements are arranged in reverse order.
-    /// The default value is <see langword="false"/>.
+    /// A positive and finite <see cref="double"/> value. The default is <c>0.0</c>.
     /// </value>
-    [Bindable(true)]
-    [Category("Layout")]
-    [EditorBrowsable(EditorBrowsableState.Advanced)]
+    public double Spacing
+    {
+        get => (double)GetValue(SpacingProperty);
+        set => SetValue(SpacingProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether children are arranged in reverse order.
+    /// </summary>
+    /// <remarks>
+    /// Setting this property will only affect the arrangement of children, not their order in the visual tree.
+    /// </remarks>
+    /// <value>
+    /// <see langword="true"/> if children are arranged in reverse order; otherwise, <see langword="false"/>.
+    /// The default is <see langword="false"/>.
+    /// </value>
     public bool ReverseOrder
     {
         get => (bool)GetValue(ReverseOrderProperty);
@@ -142,20 +157,15 @@ public class SpacedPanel : Panel
     }
 
     /// <summary>
-    /// Gets or sets a value indicating whether adjacent borders of child elements should be merged.
+    /// Gets or sets a value indicating whether adjacent borders of children should be merged.
     /// </summary>
-    /// <remarks>
-    /// The <see cref="MergeAdjacentBorders"/> property, when set to <see langword="true"/>, merges the borders
-    /// of adjacent child elements to create a seamless layout. This is only applicable when the spacing
-    /// between elements is set to <c>0.0</c> and <see cref="UniformChildrenThickness"/> is greater than <c>0.0</c>.
-    /// </remarks>
     /// <value>
-    /// A <see cref="bool"/> value indicating whether adjacent borders are merged.
-    /// The default value is <see langword="false"/>.
+    /// <see langword="true"/> if adjacent borders are merged; otherwise, <see langword="false"/>.
+    /// The default is <see langword="false"/>.
     /// </value>
-    [Bindable(true)]
-    [Category("Layout")]
-    [EditorBrowsable(EditorBrowsableState.Advanced)]
+    /// <remarks>
+    /// This property is useful when children have uniform borders and <see cref="Spacing"/> is set to <c>0.0</c>.
+    /// </remarks>
     public bool MergeAdjacentBorders
     {
         get => (bool)GetValue(MergeAdjacentBordersProperty);
@@ -163,47 +173,37 @@ public class SpacedPanel : Panel
     }
 
     /// <summary>
-    /// Gets or sets the uniform thickness value used by the panel when merging adjacent borders of child elements.
+    /// Gets or sets the uniform thickness value used when merging adjacent borders of children.
     /// </summary>
     /// <remarks>
-    /// The <see cref="UniformChildrenThickness"/> property specifies the assumed border thickness of all child
-    /// elements. This value is used by the panel to calculate the space needed when merging adjacent borders
-    /// (see <see cref="MergeAdjacentBorders"/>).This property does not apply any thickness to child elements;
-    /// it only defines the value the panel should consider during layout calculations. 
+    /// Setting this property doesn't change the border thickness of the children. It only indicates
+    /// the thickness of the borders that will be merged when <see cref="MergeAdjacentBorders"/> is
+    /// <see langword="true"/>.
     /// </remarks>
     /// <value>
-    /// A <see cref="double"/> representing the assumed uniform border thickness of child elements. 
-    /// The default value is <c>0.0</c>.
+    /// A positive and finite <see cref="double"/> value. The default is <c>0.0</c>.
     /// </value>
-    [Bindable(true)]
-    [Category("Layout")]
-    [EditorBrowsable(EditorBrowsableState.Advanced)]
     public double UniformChildrenThickness
     {
         get => (double)GetValue(UniformChildrenThicknessProperty);
         set => SetValue(UniformChildrenThicknessProperty, value);
     }
 
-// #if DEBUG
-//     protected override void OnRender(DrawingContext context)
-//     {
-//         base.OnRender(context);
-//
-//         var width = RenderSize.Width;
-//         var height = RenderSize.Height;
-//
-//         var x = width * 0.5;
-//         var y = height * 0.5;
-//
-//         context.PushGuidelineSet(new GuidelineSet([x], [0.0, height]));
-//         context.DrawLine(new Pen(Brushes.Black, 1.0), new Point(x, 0), new Point(x, height));
-//         context.Pop();
-//
-//         context.PushGuidelineSet(new GuidelineSet([0.0, width], [y]));
-//         context.DrawLine(new Pen(Brushes.Black, 1.0), new Point(0, y), new Point(width, y));
-//         context.Pop();
-//     }
-// #endif
+    private bool ContainsStretchableChildren => stretchCount > 0;
+
+    /// <summary>
+    /// Gets the value of the <see cref="StretchProperty"/> attached property for a specified element.
+    /// </summary>
+    /// <param name="element">The element from which the property value is read.</param>
+    /// <returns>The value of the <see cref="StretchProperty"/> attached property.</returns>
+    public static bool GetStretch(DependencyObject element) => (bool)element.GetValue(StretchProperty);
+
+    /// <summary>
+    /// Sets the value of the <see cref="StretchProperty"/> attached property for a specified element.
+    /// </summary>
+    /// <param name="element">The element to which the property value is written.</param>
+    /// <param name="value">The value to set.</param>
+    public static void SetStretch(DependencyObject element, bool value) => element.SetValue(StretchProperty, value);
 
     protected override Size MeasureOverride(Size constraint)
     {
@@ -212,110 +212,79 @@ public class SpacedPanel : Panel
 
         if (childrenCount is 0)
         {
-            return base.MeasureOverride(constraint);
+            return default;
         }
 
         var spacing = Spacing;
         var orientation = Orientation;
-        var uniformChildrenThickness = UniformChildrenThickness;
+        var thickness = GetUniformThickness();
 
         var totalSpacing = spacing * (childrenCount - 1);
+        var totalThickness = thickness * (childrenCount - 1);
 
-        var totalThicknessToRemove = CanMergeAdjacentBorders(spacing, uniformChildrenThickness)
-            ? uniformChildrenThickness * (childrenCount - 1)
-            : 0.0;
+        measuredWidth = 0.0;
+        measuredHeight = 0.0;
 
-        var width = 0.0;
-        var height = 0.0;
-
-        var totalNonStretchableWidth = 0.0;
-        var totalNonStretchableHeight = 0.0;
-
-        stretchableChildrenCount = 0;
-        maxStretchableChildWidth = 0.0;
-        maxStretchableChildHeight = 0.0;
+        stretchCount = 0;
 
         for (var index = 0; index < childrenCount; index++)
         {
             var child = children[index];
 
-            // Measures the size of the child.
+            // Let the child measure itself.
             child.Measure(InfiniteConstraint);
+            var childSize = child.DesiredSize;
 
-            var size = child.DesiredSize;
-
-            // Skips the child if it is collapsed or has no size.
-            if (ShouldSkipLayoutPass(child, orientation, size))
+            if (ShouldSkipChild(child, orientation))
             {
-                totalSpacing = Math.Max(0.0, totalSpacing - spacing);
-                totalThicknessToRemove = Math.Max(0.0, totalThicknessToRemove - uniformChildrenThickness);
+                totalSpacing -= spacing;
+                totalThickness -= thickness;
 
                 continue;
             }
 
-            // Adjusts the total size of the panel based on the orientation.
             if (orientation is Orientation.Horizontal)
             {
-                width += size.Width;
-                height = Math.Max(height, size.Height);
-
-                // Check that the child is stretching horizontally.
-                if ((HorizontalAlignment)child.GetValue(HorizontalAlignmentProperty) is HorizontalAlignment.Stretch)
+                if (GetStretch(child))
                 {
-                    stretchableChildrenCount++;
+                    stretchCount++;
                 }
                 else
                 {
-                    totalNonStretchableWidth += size.Width;
+                    measuredWidth += childSize.Width;
                 }
+
+                measuredHeight = Math.Max(measuredHeight, childSize.Height);
             }
             else
             {
-                width = Math.Max(width, size.Width);
-                height += size.Height;
-
-                // Check that the child is stretching vertically.
-                if ((VerticalAlignment)child.GetValue(VerticalAlignmentProperty) is VerticalAlignment.Stretch)
+                if (GetStretch(child))
                 {
-                    stretchableChildrenCount++;
+                    stretchCount++;
                 }
                 else
                 {
-                    totalNonStretchableHeight += size.Height;
+                    measuredHeight += childSize.Height;
                 }
+
+                measuredWidth = Math.Max(measuredWidth, childSize.Width);
             }
         }
 
-        // Accounts for spacing and merging borders.
-        var additive = totalSpacing - totalThicknessToRemove;
+        // Account for the spacing and uniform thickness between children.
+        var additive = totalSpacing - totalThickness;
 
+        // Fix the measured size by adding the spacing and uniform thickness.
         if (orientation is Orientation.Horizontal)
         {
-            width = Math.Max(0.0, width + additive);
+            measuredWidth = Math.Max(0.0, measuredWidth + additive);
         }
         else
         {
-            height = Math.Max(0.0, height + additive);
+            measuredHeight = Math.Max(0.0, measuredHeight + additive);
         }
 
-        // Console.WriteLine($"Measured: {width} x {height}");
-
-        // Calculates the maximum width and height for stretchable children based on the remaining space.
-        if (stretchableChildrenCount > 0)
-        {
-            totalNonStretchableWidth += additive;
-
-            if (orientation is Orientation.Horizontal)
-            {
-                maxStretchableChildWidth = (constraint.Width - totalNonStretchableWidth) / stretchableChildrenCount;
-            }
-            else
-            {
-                maxStretchableChildHeight = (constraint.Height - totalNonStretchableHeight) / stretchableChildrenCount;
-            }
-        }
-
-        return new Size(width, height);
+        return new Size(measuredWidth, measuredHeight);
     }
 
     protected override Size ArrangeOverride(Size constraint)
@@ -325,168 +294,157 @@ public class SpacedPanel : Panel
 
         if (childrenCount is 0)
         {
-            return base.ArrangeOverride(constraint);
+            return default;
         }
 
         var spacing = Spacing;
         var orientation = Orientation;
         var reverseOrder = ReverseOrder;
-        var uniformChildrenThickness = UniformChildrenThickness;
+        var uniformThickness = GetUniformThickness();
 
-        // The thickness of each child to remove when merging adjacent borders.
-        var thicknessToRemove = CanMergeAdjacentBorders(spacing, uniformChildrenThickness)
-            ? uniformChildrenThickness
-            : 0.0;
+        var x = 0.0;
+        var y = 0.0;
 
-        var stretchWidth = 0.0; // The available width for each child that is stretching horizontally.
-        var stretchHeight = 0.0; // The available height for each child that is stretching vertically.
+        var stretchWidth = 0.0;
+        var stretchHeight = 0.0;
 
-        if (stretchableChildrenCount > 0)
+        // Calculate the available space for each stretchable child.
+        if (ContainsStretchableChildren)
         {
-            // The available space for each child that is stretching is calculated based on the remaining space 
-            // after the measured size of the panel, divided by the total number of children that are stretching.
-            stretchWidth = Math.Max(0.0, constraint.Width) / stretchableChildrenCount;
-            stretchHeight = Math.Max(0.0, constraint.Height) / stretchableChildrenCount;
+            stretchWidth = (constraint.Width - measuredWidth) / stretchCount;
+            stretchHeight = (constraint.Height - measuredHeight) / stretchCount;
         }
 
-        // Console.WriteLine($"Stretchable: {stretchableChildrenCount} ({stretchWidth} x {stretchHeight})");
-
-        var x = 0.0; // Holds the x-coordinate for the next child in the horizontal line.
-        var y = 0.0; // Holds the y-coordinate for the next child in the vertical line.
+        // Calculate the starting offset for the arrangement based on the alignment.
+        if (orientation is Orientation.Horizontal)
+        {
+            x = GetArrangeOffset(constraint.Width, measuredWidth);
+        }
+        else
+        {
+            y = GetArrangeOffset(constraint.Height, measuredHeight);
+        }
 
         for (var index = 0; index < childrenCount; index++)
         {
             // Gets the child in the correct order.
-            var child = children[!reverseOrder ? index : childrenCount - 1 - index];
+            var child = children[reverseOrder ? childrenCount - 1 - index : index];
 
-            // Gets the computed size of the child.
-            var size = child.DesiredSize;
+            var childSize = child.DesiredSize;
 
-            // Skips the child if it is collapsed or has no size.
-            if (ShouldSkipLayoutPass(child, orientation, size))
+            if (ShouldSkipChild(child, orientation))
             {
                 continue;
             }
 
-            var horizontalAlignment = (HorizontalAlignment)child.GetValue(HorizontalAlignmentProperty);
-            var verticalAlignment = (VerticalAlignment)child.GetValue(VerticalAlignmentProperty);
-
             if (orientation is Orientation.Horizontal)
             {
+                if (GetStretch(child))
+                {
+                    childSize.Width = stretchWidth;
+                    child.SetValue(WidthProperty, stretchWidth);
+                }
+
                 var yy = 0.0;
+
+                // Handle vertical alignment.
+                var verticalAlignment = (VerticalAlignment)child.GetValue(VerticalAlignmentProperty);
                 if (verticalAlignment is VerticalAlignment.Stretch)
                 {
-                    // The child wants to stretch vertically, so we give it the final height.
-                    size.Height = Math.Max(size.Height, constraint.Height);
+                    childSize.Height = Math.Max(childSize.Height, constraint.Height);
                 }
                 else
                 {
-                    // Aligns the child vertically based on the specified alignment (Top, Center, Bottom).
-                    yy = ComputeAlignmentOffset(size.Height, constraint.Height, verticalAlignment);
+                    yy = GetArrangeChildOffset(verticalAlignment, constraint.Height, childSize.Height);
                 }
 
-                if (horizontalAlignment is HorizontalAlignment.Stretch)
-                {
-                    // Adjusts the size of the child if it is stretching horizontally.
-                    // The child is given the available width for stretching, respecting its maximum width.
-                    var maxWidth = Math.Min(maxStretchableChildWidth, (double)child.GetValue(MaxWidthProperty));
-                    size.Width = Math.Min(size.Width + stretchWidth, maxWidth);
+                child.Arrange(new Rect(x, yy, childSize.Width, childSize.Height));
 
-                    child.SetCurrentValue(MaxWidthProperty, size.Width);
-                }
+                // Update the horizontal offset for the next child.
+                x += Math.Round(childSize.Width);
 
-                child.Arrange(new Rect(x, yy, size.Width, size.Height));
-
-                // Updates the offsets for the next child in the horizontal line.
-                x += Math.Round(size.Width); // Rounding avoids subpixel rendering.
-
-                // Accounts for spacing and merging borders.
                 if (index < childrenCount - 1)
                 {
-                    x += spacing - thicknessToRemove;
+                    x += spacing - uniformThickness;
                 }
-
-                y = Math.Max(y, size.Height);
             }
             else
             {
+                if (GetStretch(child))
+                {
+                    childSize.Height = stretchHeight;
+                    child.SetValue(HeightProperty, stretchHeight);
+                }
+
                 var xx = 0.0;
+
+                // Handle horizontal alignment.
+                var horizontalAlignment = (HorizontalAlignment)child.GetValue(HorizontalAlignmentProperty);
                 if (horizontalAlignment is HorizontalAlignment.Stretch)
                 {
-                    // The child wants to stretch horizontally, so we give it the final width.
-                    size.Width = Math.Max(size.Width, constraint.Width);
+                    childSize.Width = Math.Max(childSize.Width, constraint.Width);
                 }
                 else
                 {
-                    // Aligns the child horizontally based on the specified alignment (Left, Center, Right).
-                    xx = ComputeAlignmentOffset(size.Width, constraint.Width, horizontalAlignment);
+                    xx = GetArrangeChildOffset(horizontalAlignment, constraint.Width, childSize.Width);
                 }
 
-                if (verticalAlignment is VerticalAlignment.Stretch)
-                {
-                    // Adjusts the size of the child if it is stretching vertically.
-                    // The child is given the available height for stretching, respecting its maximum height.
-                    var maxHeight = Math.Min(maxStretchableChildHeight, (double)child.GetValue(MaxHeightProperty));
-                    size.Height = Math.Min(size.Height + stretchHeight, maxHeight);
+                child.Arrange(new Rect(xx, y, childSize.Width, childSize.Height));
 
-                    child.SetCurrentValue(MaxHeightProperty, size.Height);
-                }
+                // Update the vertical offset for the next child.
+                y += Math.Round(childSize.Height);
 
-                child.Arrange(new Rect(xx, y, size.Width, size.Height));
-
-                // Updates the offsets for the next child in the vertical line.
-                y += Math.Round(size.Height); // Rounding avoids subpixel rendering.
-
-                // Accounts for spacing and merging borders.
                 if (index < childrenCount - 1)
                 {
-                    y += spacing - thicknessToRemove;
+                    y += spacing - uniformThickness;
                 }
-
-                x = Math.Max(x, size.Width);
             }
         }
-
-        // Console.WriteLine($"Arranged: {x} x {y}");
 
         return constraint;
     }
 
-    private static object CoerceSpacing(DependencyObject _, object value) =>
-        Math.Max(0.0, Math.Round((double)value));
+    private static bool ValidateSpacing(object value) =>
+        value is double v && double.IsPositive(v) && double.IsFinite(v);
 
-    private static object CoerceThickness(DependencyObject _, object value) =>
-        Math.Max(0.0, Math.Round((double)value));
+    private static bool ValidateUniformChildrenThickness(object value) =>
+        value is double v && double.IsPositive(v) && double.IsFinite(v);
 
-    private static bool ShouldSkipLayoutPass(UIElement child, Orientation orientation, Size size)
+    private static bool ShouldSkipChild(UIElement child, Orientation orientation)
     {
         if (child.Visibility is Visibility.Collapsed)
         {
             return true;
         }
 
-        switch (orientation)
-        {
-            case Orientation.Vertical when size.Height is 0.0 && !double.IsNaN((double)child.GetValue(HeightProperty)):
-            case Orientation.Horizontal when size.Width is 0.0 && !double.IsNaN((double)child.GetValue(WidthProperty)):
-                return true;
-            default:
-                return false;
-        }
+        // Skip children with a desired size of 0.0 and that are not stretchable.
+        return (orientation is Orientation.Horizontal && child.DesiredSize.Width is 0.0 && !GetStretch(child)) ||
+               (orientation is Orientation.Vertical && child.DesiredSize.Height is 0.0 && !GetStretch(child));
     }
 
-    private static double ComputeAlignmentOffset(double size, double maxSize, Enum alignment)
+    private double GetUniformThickness() =>
+        MergeAdjacentBorders && Spacing is 0.0 ? UniformChildrenThickness : 0.0;
+
+    private double GetArrangeOffset(double constraint, double size)
     {
-        var offset = alignment switch
+        // The starting offset must be 0.0 if the panel contains stretchable children.
+        if (ContainsStretchableChildren)
         {
-            VerticalAlignment.Center or HorizontalAlignment.Center => (maxSize - size) * 0.5,
-            VerticalAlignment.Bottom or HorizontalAlignment.Right => maxSize - size,
+            return 0.0;
+        }
+
+        return Alignment switch
+        {
+            Alignment.Center => (constraint - size) * 0.5,
+            Alignment.End => constraint - size,
             _ => 0.0
         };
-
-        return Math.Max(0.0, offset);
     }
 
-    private bool CanMergeAdjacentBorders(double spacing, double thickness) =>
-        spacing is 0.0 && thickness > 0.0 && MergeAdjacentBorders;
+    private static double GetArrangeChildOffset(Enum alignment, double constraint, double size) => alignment switch
+    {
+        VerticalAlignment.Center or HorizontalAlignment.Center => (constraint - size) * 0.5,
+        VerticalAlignment.Bottom or HorizontalAlignment.Right => constraint - size,
+        _ => 0.0
+    };
 }
