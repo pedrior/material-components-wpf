@@ -133,7 +133,7 @@ public static class InteractionAssist
     /// </param>
     /// <remarks>
     /// When this property is set to <see langword="true"/>, the ripple effect will not be clipped to the bounds of 
-    /// the <see cref="Ripple.DefiningGeometry"/>. To constrain the ripple within the bounds, set this property to
+    /// the <see cref="Ripple.Shape"/>. To constrain the ripple within the bounds, set this property to
     /// <see langword="false"/>. 
     /// The default value is <see langword="false"/>.
     /// </remarks>

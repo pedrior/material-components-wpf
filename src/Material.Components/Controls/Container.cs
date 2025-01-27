@@ -75,16 +75,16 @@ public class Container : DrawableContainer
         typeof(Container),
         new PropertyMetadata(1.0, OnSurfaceOpacityChanged, CoerceOpacity));
 
-    private static readonly DependencyPropertyKey SurfaceGeometryPropertyKey = DependencyProperty.RegisterReadOnly(
-        nameof(SurfaceGeometry),
+    private static readonly DependencyPropertyKey ShapePropertyKey = DependencyProperty.RegisterReadOnly(
+        nameof(Shape),
         typeof(Geometry),
         typeof(Container),
         new PropertyMetadata(null));
 
     /// <summary>
-    /// Identifies the <see cref="SurfaceGeometry"/> dependency property.
+    /// Identifies the <see cref="Shape"/> dependency property.
     /// </summary>
-    public static readonly DependencyProperty SurfaceGeometryProperty = SurfaceGeometryPropertyKey.DependencyProperty;
+    public static readonly DependencyProperty ShapeProperty = ShapePropertyKey.DependencyProperty;
 
     private static readonly DependencyProperty[] ShapeProperties =
     [
@@ -280,24 +280,24 @@ public class Container : DrawableContainer
     }
 
     /// <summary>
-    /// Gets the geometry that defines the surface outline of the container.
+    /// Gets the geometry that defines the shape of the container.
     /// </summary>
     /// <remarks>
-    /// The <see cref="SurfaceGeometry"/> reflects the container's current shape, including any applied 
+    /// The <see cref="Shape"/> reflects the container's current shape, including any applied 
     /// shape property. This property updates dynamically when the container's size or shape-related properties change.
     /// It can be used for advanced rendering, hit-testing scenarios, or any custom shape-related logic.
     /// </remarks>
     /// <value>
-    /// A <see cref="Geometry"/> object representing the shape of the container's surface. 
+    /// A <see cref="Geometry"/> object representing the shape of the container's shape. 
     /// The default value is <see langword="null"/>, indicating no defined geometry.
     /// </value>
     [Bindable(true)]
     [Category("Appearance")]
     [EditorBrowsable(EditorBrowsableState.Advanced)]
-    public Geometry? SurfaceGeometry
+    public Geometry? Shape
     {
-        get => (Geometry?)GetValue(SurfaceGeometryProperty);
-        private set => SetValue(SurfaceGeometryPropertyKey, value);
+        get => (Geometry?)GetValue(ShapeProperty);
+        private set => SetValue(ShapePropertyKey, value);
     }
 
     protected override DrawableContainerOrder Order => DrawableContainerOrder.VisualThenChild;
@@ -413,7 +413,7 @@ public class Container : DrawableContainer
         // Check if we've drawn something.
         if (renderGeometry is null || renderGeometry.IsEmpty())
         {
-            SurfaceGeometry = Geometry.Empty;
+            Shape = Geometry.Empty;
         }
         else
         {
@@ -426,12 +426,12 @@ public class Container : DrawableContainer
                 shapeDefinition.Radius!.Value.Inflate(thickness * 0.5);
 
                 // We need to rebuild the geometry with the new radius.
-                SurfaceGeometry = shapeDefinition.BuildGeometry();
+                Shape = shapeDefinition.BuildGeometry();
             }
             else // Just clone our rendered geometry.
             {
-                SurfaceGeometry = renderGeometry.Clone();
-                SurfaceGeometry.Freeze();
+                Shape = renderGeometry.Clone();
+                Shape.Freeze();
             }
         }
 

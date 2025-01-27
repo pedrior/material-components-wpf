@@ -39,12 +39,12 @@
 
                             <controls:StateLayer
                                 Width="{TemplateBinding ActualHeight}"
-                                DefiningGeometry="{Binding ElementName=Container, Path=SurfaceGeometry}"
                                 IsHovered="{TemplateBinding IsMouseOver}"
                                 IsPressed="{TemplateBinding IsPressed}"
+                                Shape="{Binding ElementName=Container, Path=Shape}"
                                 Tint="{TemplateBinding Foreground}">
 
-                                <controls:Ripple DefiningGeometry="{Binding ElementName=Container, Path=SurfaceGeometry}">
+                                <controls:Ripple Shape="{Binding ElementName=Container, Path=Shape}">
                                     <controls:Container x:Name="Container" Background="{TemplateBinding InnerBackground}">
                                         <controls:SymbolIcon
                                             Width="{TemplateBinding icons:IconAssist.Size}"

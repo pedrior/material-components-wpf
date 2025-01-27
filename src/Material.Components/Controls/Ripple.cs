@@ -58,10 +58,10 @@ public class Ripple : DrawableContainer
         new PropertyMetadata(false, OnIsUnboundedChanged));
 
     /// <summary>
-    /// Identifies the <see cref="DefiningGeometry"/> dependency property.
+    /// Identifies the <see cref="Shape"/> dependency property.
     /// </summary>
-    public static readonly DependencyProperty DefiningGeometryProperty = DependencyProperty.Register(
-        nameof(DefiningGeometry),
+    public static readonly DependencyProperty ShapeProperty = DependencyProperty.Register(
+        nameof(Shape),
         typeof(Geometry),
         typeof(Ripple),
         new PropertyMetadata(null, OnDefiningGeometryChanged));
@@ -200,7 +200,7 @@ public class Ripple : DrawableContainer
     /// geometry.
     /// <remarks>
     /// When <see langword="true"/>, the ripple effect will expand beyond the bounds of the control. When
-    /// <see langword="false"/>, the ripple effect will be clipped to the bounds of the <see cref="DefiningGeometry"/>.
+    /// <see langword="false"/>, the ripple effect will be clipped to the bounds of the <see cref="Shape"/>.
     /// </remarks>
     /// <value>
     /// <see langword="true"/> if the ripple effect is unbounded; otherwise, <see langword="false"/>.
@@ -228,10 +228,10 @@ public class Ripple : DrawableContainer
     /// </value>
     [Bindable(true)]
     [Category("Appearance")]
-    public Geometry? DefiningGeometry
+    public Geometry? Shape
     {
-        get => (Geometry?)GetValue(DefiningGeometryProperty);
-        set => SetValue(DefiningGeometryProperty, value);
+        get => (Geometry?)GetValue(ShapeProperty);
+        set => SetValue(ShapeProperty, value);
     }
 
     /// <summary>
@@ -365,8 +365,7 @@ public class Ripple : DrawableContainer
         return brush;
     }
 
-    private void UpdateEffectClipping() => 
-        VisualLayer.Clip = IsUnbounded ? null : DefiningGeometry;
+    private void UpdateEffectClipping() => VisualLayer.Clip = IsUnbounded ? null : Shape;
 
     private void SubscribeToEvents(UIElement element)
     {

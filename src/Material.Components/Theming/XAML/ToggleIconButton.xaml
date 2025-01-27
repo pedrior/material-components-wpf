@@ -24,13 +24,13 @@
                 <ControlTemplate TargetType="{x:Type controls:ToggleIconButton}">
                     <controls:StateLayer
                         Margin="4"
-                        DefiningGeometry="{Binding ElementName=Container, Path=SurfaceGeometry}"
                         IsHovered="{TemplateBinding IsMouseOver}"
                         IsPressed="{TemplateBinding IsPressed}"
+                        Shape="{Binding ElementName=Container, Path=Shape}"
                         Tint="{TemplateBinding Foreground}">
 
-                        <controls:FocusIndicator Shape="{Binding ElementName=Container, Path=SurfaceGeometry}">
-                            <controls:Ripple DefiningGeometry="{Binding ElementName=Container, Path=SurfaceGeometry}" Tint="{TemplateBinding Foreground}">
+                        <controls:FocusIndicator Shape="{Binding ElementName=Container, Path=Shape}">
+                            <controls:Ripple Shape="{Binding ElementName=Container, Path=Shape}" Tint="{TemplateBinding Foreground}">
                                 <controls:Container
                                     x:Name="Container"
                                     Background="{TemplateBinding Background}"

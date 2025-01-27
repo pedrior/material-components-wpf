@@ -36,14 +36,14 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type controls:Button}">
-                    <controls:FocusIndicator Shape="{Binding ElementName=Container, Path=SurfaceGeometry}">
+                    <controls:FocusIndicator Shape="{Binding ElementName=Container, Path=Shape}">
                         <controls:StateLayer
-                            DefiningGeometry="{Binding ElementName=Container, Path=SurfaceGeometry}"
                             IsHovered="{TemplateBinding IsMouseOver}"
                             IsPressed="{TemplateBinding IsPressed}"
+                            Shape="{Binding ElementName=Container, Path=Shape}"
                             Tint="{TemplateBinding Foreground}">
 
-                            <controls:Ripple DefiningGeometry="{Binding ElementName=Container, Path=SurfaceGeometry}">
+                            <controls:Ripple Shape="{Binding ElementName=Container, Path=Shape}">
                                 <controls:Container
                                     x:Name="Container"
                                     Background="{TemplateBinding Background}"

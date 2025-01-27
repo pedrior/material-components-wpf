@@ -10,7 +10,7 @@ namespace Material.Components.Controls;
 /// <remarks>
 /// The <see cref="StateLayer"/> control dynamically adjusts its visual appearance based on user interactions. 
 /// It visually responds to hover, press, and drag states by changing its opacity, providing immediate feedback 
-/// to users. The appearance can be customized using the <see cref="Tint"/> and <see cref="DefiningGeometry"/>
+/// to users. The appearance can be customized using the <see cref="Tint"/> and <see cref="Shape"/>
 /// properties.
 /// </remarks>
 [Browsable(false)]
@@ -27,10 +27,10 @@ public class StateLayer : DrawableContainer
         new FrameworkPropertyMetadata(Brushes.Black, FrameworkPropertyMetadataOptions.AffectsRender));
 
     /// <summary>
-    /// Identifies the <see cref="DefiningGeometry"/> dependency property.
+    /// Identifies the <see cref="Shape"/> dependency property.
     /// </summary>
-    public static readonly DependencyProperty DefiningGeometryProperty = DependencyProperty.Register(
-        nameof(DefiningGeometry),
+    public static readonly DependencyProperty ShapeProperty = DependencyProperty.Register(
+        nameof(Shape),
         typeof(Geometry),
         typeof(StateLayer),
         new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender));
@@ -127,10 +127,10 @@ public class StateLayer : DrawableContainer
     /// </value>
     [Bindable(true)]
     [Category("Appearance")]
-    public Geometry? DefiningGeometry
+    public Geometry? Shape
     {
-        get => (Geometry?)GetValue(DefiningGeometryProperty);
-        set => SetValue(DefiningGeometryProperty, value);
+        get => (Geometry?)GetValue(ShapeProperty);
+        set => SetValue(ShapeProperty, value);
     }
 
     /// <summary>
@@ -196,7 +196,7 @@ public class StateLayer : DrawableContainer
     {
         base.OnVisualLayerRender(context);
 
-        if (DefiningGeometry is { } geometry)
+        if (Shape is { } geometry)
         {
             context.DrawGeometry(Tint, null, geometry);
         }
