@@ -7,6 +7,10 @@
     <Style TargetType="{x:Type controls:NavigationRailActions}">
         <Setter Property="Focusable" Value="False" />
         <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="VerticalAlignment" Value="Top" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Top" />
         <Setter Property="layout:LayoutAssist.Spacing" Value="4" />
         <Setter Property="Template">
             <Setter.Value>
@@ -17,6 +21,8 @@
                         BorderThickness="{TemplateBinding BorderThickness}">
 
                         <controls:SpacedPanel
+                            HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
                             IsItemsHost="True"
                             Orientation="Vertical"
                             Spacing="{TemplateBinding layout:LayoutAssist.Spacing}" />

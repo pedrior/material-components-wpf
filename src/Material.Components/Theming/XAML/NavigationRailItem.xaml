@@ -22,6 +22,7 @@
         <Setter Property="OverridesDefaultStyle" Value="True" />
         <Setter Property="VerticalAlignment" Value="Center" />
         <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="TextBlock.TextAlignment" Value="Center" />
         <Setter Property="icons:IconAssist.Size" Value="24" />
         <Setter Property="icons:IconAssist.Foreground" Value="{DynamicResource MaterialColorOnSurfaceVariant}" />
         <Setter Property="shapes:ShapeAssist.Style" Value="Full" />
@@ -31,14 +32,17 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type controls:NavigationRailItem}">
-                    <controls:FocusIndicator Offset="-4">
+                    <controls:FocusIndicator Offset="-3">
                         <controls:SpacedPanel
+                            Alignment="Center"
                             Background="{TemplateBinding Background}"
                             Orientation="Vertical"
                             Spacing="{TemplateBinding layout:LayoutAssist.Spacing}">
 
                             <controls:StateLayer
+                                x:Name="StateLayer"
                                 Width="{TemplateBinding ActualHeight}"
+                                controls:SpacedPanel.Stretch="True"
                                 IsHovered="{TemplateBinding IsMouseOver}"
                                 IsPressed="{TemplateBinding IsPressed}"
                                 Shape="{Binding ElementName=Container, Path=Shape}"
@@ -47,11 +51,9 @@
                                 <controls:Ripple Shape="{Binding ElementName=Container, Path=Shape}">
                                     <controls:Container x:Name="Container" Background="{TemplateBinding InnerBackground}">
                                         <controls:SymbolIcon
+                                            x:Name="Icon"
                                             Width="{TemplateBinding icons:IconAssist.Size}"
                                             Height="{TemplateBinding icons:IconAssist.Size}"
-                                            HorizontalAlignment="Center"
-                                            VerticalAlignment="Center"
-                                            AutoCollapse="True"
                                             RenderInvalidSymbol="False" />
                                     </controls:Container>
                                 </controls:Ripple>
@@ -59,15 +61,14 @@
 
                             <ContentPresenter
                                 x:Name="Content"
-                                Margin="0,0,0,4"
+                                Margin="2,4"
                                 VerticalAlignment="Center"
                                 Content="{TemplateBinding Content}"
                                 ContentStringFormat="{TemplateBinding ContentStringFormat}"
                                 ContentTemplate="{TemplateBinding ContentTemplate}"
                                 ContentTemplateSelector="{TemplateBinding ContentTemplateSelector}"
                                 RecognizesAccessKey="True"
-                                TextBlock.TextAlignment="Center"
-                                TextElement.Foreground="{TemplateBinding Foreground}" />
+                                TextBlock.Foreground="{TemplateBinding Foreground}" />
                         </controls:SpacedPanel>
                     </controls:FocusIndicator>
 
@@ -75,6 +76,10 @@
                         <Trigger Property="Content" Value="{x:Null}">
                             <Setter TargetName="Content" Property="Visibility" Value="Collapsed" />
                         </Trigger>
+
+                        <DataTrigger Binding="{Binding ElementName=Icon, Path=IsRendered}" Value="False">
+                            <Setter TargetName="StateLayer" Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
@@ -82,28 +87,16 @@
 
         <Style.Triggers>
             <Trigger Property="IsChecked" Value="True">
+                <Setter Property="icons:IconAssist.Fill" Value="True" />
                 <Setter Property="Foreground" Value="{DynamicResource MaterialColorOnSurface}" />
                 <Setter Property="InnerBackground" Value="{DynamicResource MaterialColorSecondaryContainer}" />
                 <Setter Property="icons:IconAssist.Foreground" Value="{DynamicResource MaterialColorOnSecondaryContainer}" />
                 <Setter Property="interaction:InteractionAssist.RippleTint" Value="{DynamicResource MaterialColorOnSecondaryContainer}" />
             </Trigger>
 
-            <MultiTrigger>
-                <MultiTrigger.Conditions>
-                    <Condition Property="IsChecked" Value="True" />
-                    <Condition Property="FillIconOnChecked" Value="True" />
-                </MultiTrigger.Conditions>
-                <Setter Property="icons:IconAssist.Fill" Value="True" />
-            </MultiTrigger>
-
-            <MultiTrigger>
-                <MultiTrigger.Conditions>
-                    <Condition Property="IsChecked" Value="False" />
-                    <Condition Property="IsPressed" Value="True" />
-                    <Condition Property="FillIconOnPressed" Value="True" />
-                </MultiTrigger.Conditions>
-                <Setter Property="icons:IconAssist.Fill" Value="True" />
-            </MultiTrigger>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="icons:IconAssist.Weight" Value="SemiBold" />
+            </Trigger>
         </Style.Triggers>
     </Style>
 </ResourceDictionary>

@@ -7,10 +7,8 @@ namespace Material.Components.Controls;
 /// Represents a collection of action items displayed in a <see cref="NavigationRail"/>.
 /// </summary>
 /// <remarks>
-/// The <see cref="NavigationRailActions"/> class is an <see cref="ItemsControl"/> designed 
-/// to host a collection of action items, such as buttons or other interactive elements, 
-/// that are displayed in a navigation rail. These actions can be positioned at the top or 
-/// bottom of the navigation rail based on the layout configuration.
+/// This class extends the functionality of the standard <see cref="System.Windows.Controls.ItemsControl"/>,
+/// representing a collection of action that are displayed in a navigation rail.
 /// </remarks>
 public class NavigationRailActions : ItemsControl
 {

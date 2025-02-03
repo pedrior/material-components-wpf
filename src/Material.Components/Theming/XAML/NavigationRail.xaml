@@ -8,6 +8,7 @@
         <Setter Property="Background" Value="{DynamicResource MaterialColorSurface}" />
         <Setter Property="Focusable" Value="False" />
         <Setter Property="IsTabStop" Value="False" />
+        <Setter Property="Width" Value="80" />
         <Setter Property="MinWidth" Value="80" />
         <Setter Property="Alignment" Value="Top" />
         <Setter Property="FocusVisualStyle" Value="{x:Null}" />
@@ -27,30 +28,29 @@
 
                         <ScrollViewer VerticalScrollBarVisibility="Hidden">
                             <Grid Margin="0,44,0,56">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
 
                                 <ContentPresenter
                                     x:Name="TopActions"
-                                    Grid.Column="0"
-                                    VerticalAlignment="Top"
+                                    Grid.Row="0"
+                                    Margin="0,0,0,40"
                                     Content="{TemplateBinding TopActions}" />
 
                                 <controls:SpacedPanel
                                     x:Name="Destinations"
-                                    Grid.Column="1"
-                                    Margin="0,40"
-                                    VerticalAlignment="Top"
+                                    Grid.Row="1"
                                     IsItemsHost="True"
                                     Orientation="Vertical"
                                     Spacing="{TemplateBinding layout:LayoutAssist.Spacing}" />
 
                                 <ContentPresenter
                                     x:Name="BottomActions"
-                                    Grid.Column="2"
+                                    Grid.Row="2"
+                                    Margin="0,40,0,0"
                                     VerticalAlignment="Bottom"
                                     Content="{TemplateBinding BottomActions}" />
                             </Grid>
