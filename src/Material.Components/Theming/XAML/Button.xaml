@@ -61,14 +61,12 @@
                                             x:Name="Icon"
                                             Width="{TemplateBinding icons:IconAssist.Size}"
                                             Height="{TemplateBinding icons:IconAssist.Size}"
-                                            HorizontalAlignment="Center"
                                             VerticalAlignment="Center"
                                             AutoCollapse="True"
                                             RenderInvalidSymbol="False" />
 
                                         <ContentPresenter
                                             x:Name="Content"
-                                            HorizontalAlignment="Center"
                                             VerticalAlignment="Center"
                                             Content="{TemplateBinding Content}"
                                             ContentStringFormat="{TemplateBinding ContentStringFormat}"
